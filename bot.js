@@ -1,5 +1,3 @@
-
-bot_code = '''
 const { Telegraf, Markup } = require('telegraf');
 
 // BOT TOKEN - öz tokeniňi goý
@@ -84,26 +82,26 @@ bot.command('salam', (ctx) => {
 });
 
 function sendWelcome(ctx) {
-    const text = `👋 Salam! Kema Hyzmatlara hoş geldiniz!\\n\\nNeme satyn almak isleýärsiňiz?`;
+    const text = `👋 Salam! Kema Hyzmatlara hoş geldiniz!\n\nNeme satyn almak isleýärsiňiz?`;
     ctx.reply(text, mainMenu);
 }
 
 // ==================== UC SATYN AL ====================
 bot.hears('💎 UC satyn al', (ctx) => {
-    let text = '💎 UC Bahalary:\\n\\n';
+    let text = '💎 UC Bahalary:\n\n';
     for (const [uc, price] of Object.entries(ucPrices)) {
-        text += `• ${uc} — ${price}\\n`;
+        text += `• ${uc} — ${price}\n`;
     }
-    text += '\\n🛒 Sargyt etmek üçin UC saýlaň:';
+    text += '\n🛒 Sargyt etmek üçin UC saýlaň:';
     ctx.reply(text, ucMenu);
 });
 
 // UC saýlanynda
-bot.hears(/^(\\d+) UC — (.+) TMT$/, (ctx) => {
+bot.hears(/^(\d+) UC — (.+) TMT$/, (ctx) => {
     const uc = ctx.match[1];
     const price = ctx.match[2];
     ctx.reply(
-        `✅ Saýladynyz: ${uc} UC — ${price} TMT\\n\\n` +
+        `✅ Saýladynyz: ${uc} UC — ${price} TMT\n\n` +
         `🛒 Sargyt etmek üçin "📱 Habarlaş" düwmesine basyň.`,
         orderMenu
     );
@@ -111,20 +109,20 @@ bot.hears(/^(\\d+) UC — (.+) TMT$/, (ctx) => {
 
 // ==================== VPN SATYN AL ====================
 bot.hears('🔒 VPN satyn al', (ctx) => {
-    let text = '🔒 VPN Bahalary:\\n\\n';
+    let text = '🔒 VPN Bahalary:\n\n';
     for (const [period, price] of Object.entries(vpnPrices)) {
-        text += `• ${period} — ${price}\\n`;
+        text += `• ${period} — ${price}\n`;
     }
-    text += '\\n🛒 Sargyt etmek üçin dowam edip bilen habarlaşyň:';
+    text += '\n🛒 Sargyt etmek üçin dowam edip bilen habarlaşyň:';
     ctx.reply(text, vpnMenu);
 });
 
 // VPN saýlanynda
-bot.hears(/^(\\d+) aý — (.+) TMT$/, (ctx) => {
+bot.hears(/^(\d+) aý — (.+) TMT$/, (ctx) => {
     const period = ctx.match[1];
     const price = ctx.match[2];
     ctx.reply(
-        `✅ Saýladynyz: ${period} aý VPN — ${price} TMT\\n\\n` +
+        `✅ Saýladynyz: ${period} aý VPN — ${price} TMT\n\n` +
         `🛒 Sargyt etmek üçin "📱 Habarlaş" düwmesine basyň.`,
         orderMenu
     );
@@ -133,11 +131,11 @@ bot.hears(/^(\\d+) aý — (.+) TMT$/, (ctx) => {
 // ==================== SARGYT ====================
 bot.hears('🛒 Sargyt', (ctx) => {
     const text = 
-        '🛒 Sargyt etmek\\n\\n' +
-        'Sargyt etmek üçin aşakdaky maglumatlary iberiň:\\n\\n' +
-        '1️⃣ Harydyn ady (UC / VPN)\\n' +
-        '2️⃣ Mocberi\\n' +
-        '3️⃣ Telefon belgiňiz\\n\\n' +
+        '🛒 Sargyt etmek\n\n' +
+        'Sargyt etmek üçin aşakdaky maglumatlary iberiň:\n\n' +
+        '1️⃣ Harydyn ady (UC / VPN)\n' +
+        '2️⃣ Mocberi\n' +
+        '3️⃣ Telefon belgiňiz\n\n' +
         '✉️ ýa-da @MrMakeout bilen habarlaşyň';
     ctx.reply(text, orderMenu);
 });
@@ -153,10 +151,10 @@ bot.hears('👤 Şahsy otag', (ctx) => {
     const balance = 0; // Database-den okan zat
     
     const text = 
-        '👤 Şahsy otag\\n\\n' +
-        `🆔 ID: ${userId}\\n` +
-        `👤 Adyňyz: ${firstName}\\n` +
-        `📊 Sargytlaryňyz: ${orders}\\n` +
+        '👤 Şahsy otag\n\n' +
+        `🆔 ID: ${userId}\n` +
+        `👤 Adyňyz: ${firstName}\n` +
+        `📊 Sargytlaryňyz: ${orders}\n` +
         `💰 Bal: ${balance}`;
     
     ctx.reply(text, menuWithBack);
@@ -165,15 +163,15 @@ bot.hears('👤 Şahsy otag', (ctx) => {
 // ==================== HABARLAŞ ====================
 bot.hears('📞 Habarlaş', (ctx) => {
     const text = 
-        '📞 Habarlaş\\n\\n' +
-        '📱 Telegram: @MrMakeout\\n' +
+        '📞 Habarlaş\n\n' +
+        '📱 Telegram: @MrMakeout\n' +
         '📍 Aşgabat şäheri';
     ctx.reply(text, contactMenu);
 });
 
 bot.hears('📱 Telegram', (ctx) => {
     ctx.reply(
-        '🔗 Telegram kanala geçmek üçin aşakdaky baglanyşyga basyň:\\n\\nhttps://t.me/MrMakeout',
+        '🔗 Telegram kanala geçmek üçin aşakdaky baglanyşyga basyň:\n\nhttps://t.me/MrMakeout',
         Markup.inlineKeyboard([
             Markup.button.url('📱 Telegram', 'https://t.me/MrMakeout'),
             Markup.button.callback('⬅️ Yza', 'back_to_menu')
@@ -184,11 +182,11 @@ bot.hears('📱 Telegram', (ctx) => {
 // ==================== BAL TOPLA ====================
 bot.hears('💰 Bal topla', (ctx) => {
     const text = 
-        '💰 Bal topla gazan\\n\\n' +
-        '🎁 Her sargyt üçin bal gazanyň!\\n\\n' +
-        '• 100 TMT sargyt — 5 bal\\n' +
-        '• 500 TMT sargyt — 30 bal\\n' +
-        '• 1000 TMT sargyt — 70 bal\\n\\n' +
+        '💰 Bal topla gazan\n\n' +
+        '🎁 Her sargyt üçin bal gazanyň!\n\n' +
+        '• 100 TMT sargyt — 5 bal\n' +
+        '• 500 TMT sargyt — 30 bal\n' +
+        '• 1000 TMT sargyt — 70 bal\n\n' +
         '🏆 Bal ygnap, arzanlyklar gazanyň!';
     ctx.reply(text, menuWithBack);
 });
@@ -217,17 +215,17 @@ bot.command('wagt', (ctx) => {
 
 // ==================== BAHA ====================
 bot.command('baha', (ctx) => {
-    ctx.reply('💰 Bahalar 50 manatdan başlaýar.\\n\\nEsasy menýudan görüp bilersiňiz.', mainMenu);
+    ctx.reply('💰 Bahalar 50 manatdan başlaýar.\n\nEsasy menýudan görüp bilersiňiz.', mainMenu);
 });
 
 // ==================== INLINE CALLBACKS ====================
 bot.action('uc_buy', (ctx) => {
     ctx.deleteMessage();
-    let text = '💎 UC Bahalary:\\n\\n';
+    let text = '💎 UC Bahalary:\n\n';
     for (const [uc, price] of Object.entries(ucPrices)) {
-        text += `• ${uc} — ${price}\\n`;
+        text += `• ${uc} — ${price}\n`;
     }
-    text += '\\n🛒 Sargyt etmek üçin UC saýlaň:';
+    text += '\n🛒 Sargyt etmek üçin UC saýlaň:';
     ctx.reply(text, ucMenu);
 });
 
@@ -245,9 +243,3 @@ process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
 console.log('✅ Bot işe başlady!');
-'''
-
-with open('/mnt/agents/output/bot.js', 'w', encoding='utf-8') as f:
-    f.write(bot_code)
-
-print("✅ bot.js tayyar!")
