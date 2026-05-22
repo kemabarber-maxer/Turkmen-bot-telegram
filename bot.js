@@ -1,398 +1,253 @@
-import { Bot, InlineKeyboard } from "grammy";
 
-const bot = new Bot("8836556532:AAEggdrCWkRfskzg-sPg8T9Xhdey44LPy9s");
+bot_code = '''
+const { Telegraf, Markup } = require('telegraf');
 
-// UC prices
-const ucPrices = [
-  { uc: 60, tmt: 23 },
-  { uc: 120, tmt: 46 },
-  { uc: 325, tmt: 105 },
-  { uc: 385, tmt: 128 },
-  { uc: 660, tmt: 210 },
-  { uc: 720, tmt: 256 },
-  { uc: 1320, tmt: 420 },
-  { uc: 1800, tmt: 520 },
-  { uc: 3850, tmt: 1390 },
-  { uc: 8100, tmt: 2000 },
-];
+// BOT TOKEN - öz tokeniňi goý
+const bot = new Telegraf('8836556532:AAEggdrCWkRfskzg-sPg8T9Xhdey44LPy9s');
 
-// Main menu
-const mainMenu = new InlineKeyboard()
-  .text("💎 UC satyn al", "uc_menu").row()
-  .text("🔒 VPN satyn al", "vpn_menu").row()
-  .text("🛒 Sargyt", "order").row()
-  .text("👤 Sahsy otag", "personal").row()
-  .text("📞 Habarlas", "contact").row()
-  .text("💰 Bal topla", "balance");
+// UC bahalary
+const ucPrices = {
+    '60 UC': '23 TMT',
+    '120 UC': '46 TMT',
+    '325 UC': '105 TMT',
+    '385 UC': '128 TMT',
+    '660 UC': '210 TMT',
+    '720 UC': '256 TMT',
+    '1320 UC': '420 TMT',
+    '1800 UC': '520 TMT',
+    '3850 UC': '1390 TMT',
+    '8100 UC': '2000 TMT'
+};
 
-// UC menu
-function ucMenu() {
-  const keyboard = new InlineKeyboard();
-  ucPrices.forEach((item, index) => {
-    keyboard.text(
-      `${item.uc} UC — ${item.tmt} TMT`,
-      `uc_${item.uc}_${item.tmt}`
-    );
-    if ((index + 1) % 2 === 0) keyboard.row();
-  });
-  keyboard.text("⬅️ Yza", "back");
-  return keyboard;
+// VPN bahalary
+const vpnPrices = {
+    '1 aý': '50 TMT',
+    '3 aý': '130 TMT',
+    '6 aý': '240 TMT',
+    '12 aý': '450 TMT'
+};
+
+// Esasy menýu — butonlar aşakda
+const mainMenu = Markup.keyboard([
+    ['💎 UC satyn al', '🔒 VPN satyn al'],
+    ['🛒 Sargyt', '👤 Şahsy otag'],
+    ['📞 Habarlaş', '💰 Bal topla']
+]).resize();
+
+// Yza menýusy
+const backMenu = Markup.keyboard([
+    ['⬅️ Yza']
+]).resize();
+
+// Esasy menýu + Yza
+const menuWithBack = Markup.keyboard([
+    ['💎 UC satyn al', '🔒 VPN satyn al'],
+    ['🛒 Sargyt', '👤 Şahsy otag'],
+    ['📞 Habarlaş', '💰 Bal topla'],
+    ['⬅️ Yza']
+]).resize();
+
+// UC bahalary menýusy
+const ucMenu = Markup.keyboard([
+    ['60 UC — 23 TMT', '120 UC — 46 TMT'],
+    ['325 UC — 105 TMT', '385 UC — 128 TMT'],
+    ['660 UC — 210 TMT', '720 UC — 256 TMT'],
+    ['1320 UC — 420 TMT', '1800 UC — 520 TMT'],
+    ['3850 UC — 1390 TMT', '8100 UC — 2000 TMT'],
+    ['⬅️ Yza']
+]).resize();
+
+// VPN bahalary menýusy
+const vpnMenu = Markup.keyboard([
+    ['1 aý — 50 TMT', '3 aý — 130 TMT'],
+    ['6 aý — 240 TMT', '12 aý — 450 TMT'],
+    ['⬅️ Yza']
+]).resize();
+
+// Sargyt menýusy
+const orderMenu = Markup.keyboard([
+    ['📱 Habarlaş', '⬅️ Yza']
+]).resize();
+
+// Habarlaş menýusy
+const contactMenu = Markup.keyboard([
+    ['📱 Telegram', '⬅️ Menu']
+]).resize();
+
+// ==================== START / SALAM ====================
+bot.start((ctx) => {
+    sendWelcome(ctx);
+});
+
+bot.command('salam', (ctx) => {
+    sendWelcome(ctx);
+});
+
+function sendWelcome(ctx) {
+    const text = `👋 Salam! Kema Hyzmatlara hoş geldiniz!\\n\\nNeme satyn almak isleýärsiňiz?`;
+    ctx.reply(text, mainMenu);
 }
 
-// VPN menu
-const vpnMenu = new InlineKeyboard()
-  .text("📱 Happ", "vpn_happ").row()
-  .text("🌐 Shadowsocks", "vpn_shadowsocks").row()
-  .text("🔐 Outline", "vpn_outline").row()
-  .text("⬅️ Yza", "back");
-
-// VPN payment menu
-function vpnPaymentMenu(type) {
-  return new InlineKeyboard()
-    .text("📅 Aylyk — 80 TMT", `vpn_${type}_monthly`).row()
-    .text("📆 Hepde — 30 TMT", `vpn_${type}_weekly`).row()
-    .text("⬅️ Yza", "vpn_menu");
-}
-
-// Commands
-bot.command("start", async (ctx) => {
-  await ctx.reply(
-    "🎉 *Kema Hyzmatlar*\\n\\n" +
-    "Hos geldiniz! Neme satyn almak isleýarsiniz?",
-    { 
-      parse_mode: "Markdown",
-      reply_markup: mainMenu
+// ==================== UC SATYN AL ====================
+bot.hears('💎 UC satyn al', (ctx) => {
+    let text = '💎 UC Bahalary:\\n\\n';
+    for (const [uc, price] of Object.entries(ucPrices)) {
+        text += `• ${uc} — ${price}\\n`;
     }
-  );
+    text += '\\n🛒 Sargyt etmek üçin UC saýlaň:';
+    ctx.reply(text, ucMenu);
 });
 
-bot.command("uc", async (ctx) => {
-  let text = "💎 *UC Bahalary:*\\n\\n";
-  ucPrices.forEach(item => {
-    text += `• ${item.uc} UC — *${item.tmt} TMT*\\n`;
-  });
-  text += "\\n🛒 Sargyt etmek ucin UC saylan:";
-  
-  await ctx.reply(text, { 
-    parse_mode: "Markdown",
-    reply_markup: ucMenu()
-  });
+// UC saýlanynda
+bot.hears(/^(\\d+) UC — (.+) TMT$/, (ctx) => {
+    const uc = ctx.match[1];
+    const price = ctx.match[2];
+    ctx.reply(
+        `✅ Saýladynyz: ${uc} UC — ${price} TMT\\n\\n` +
+        `🛒 Sargyt etmek üçin "📱 Habarlaş" düwmesine basyň.`,
+        orderMenu
+    );
 });
 
-bot.command("vpn", async (ctx) => {
-  await ctx.reply(
-    "🔒 *VPN Hyzmatlary:*\\n\\n" +
-    "📱 Happ\\n" +
-    "🌐 Shadowsocks\\n" +
-    "🔐 Outline\\n\\n" +
-    "📅 Aylyk — *80 TMT*\\n" +
-    "📆 Hepde — *30 TMT*",
-    { 
-      parse_mode: "Markdown",
-      reply_markup: vpnMenu
+// ==================== VPN SATYN AL ====================
+bot.hears('🔒 VPN satyn al', (ctx) => {
+    let text = '🔒 VPN Bahalary:\\n\\n';
+    for (const [period, price] of Object.entries(vpnPrices)) {
+        text += `• ${period} — ${price}\\n`;
     }
-  );
+    text += '\\n🛒 Sargyt etmek üçin dowam edip bilen habarlaşyň:';
+    ctx.reply(text, vpnMenu);
 });
 
-// Callback handler
-bot.on("callback_query:data", async (ctx) => {
-  const data = ctx.callbackQuery.data;
-  
-  switch(data) {
-    case "uc_menu":
-      let ucText = "💎 *UC Bahalary:*\\n\\n";
-      ucPrices.forEach(item => {
-        ucText += `• ${item.uc} UC — *${item.tmt} TMT*\\n`;
-      });
-      ucText += "\\n🛒 Sargyt etmek ucin UC saylan:";
-      
-      await ctx.editMessageText(ucText, { 
-        parse_mode: "Markdown",
-        reply_markup: ucMenu()
-      });
-      break;
-      
-    case "vpn_menu":
-      await ctx.editMessageText(
-        "🔒 *VPN Hyzmatlary:*\\n\\n" +
-        "Hyzmat saylan:",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: vpnMenu
-        }
-      );
-      break;
-      
-    case "order":
-      await ctx.editMessageText(
-        "🛒 *Sargyt etmek*\\n\\n" +
-        "Sargyt etmek ucin asakdaky maglumatlary iberin:\\n\\n" +
-        "1️⃣ Harydyn ady (UC / VPN)\\n" +
-        "2️⃣ Mocberi\\n" +
-        "3️⃣ Telefon belginiz\\n\\n" +
-        "📩 ya-da @MrMakeout bilen habarlasyň",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: new InlineKeyboard()
-            .url("📱 Habarlas", "https://t.me/MrMakeout")
-            .text("⬅️ Menu", "menu")
-        }
-      );
-      break;
-      
-    case "personal":
-      await ctx.editMessageText(
-        "👤 *Sahsy otag*\\n\\n" +
-        "🆔 ID: " + ctx.from.id + "\\n" +
-        "👤 Adynyz: " + (ctx.from.first_name || "Belli dal") + "\\n\\n" +
-        "📊 Sargytlaryňyz: 0\\n" +
-        "💰 Bal: 0",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: mainMenu
-        }
-      );
-      break;
-      
-    case "contact":
-      await ctx.editMessageText(
-        "📞 *Habarlas*\\n\\n" +
-        "📱 Telegram: @MrMakeout\\n" +
-        "📍 Asgabat saheri",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: new InlineKeyboard()
-            .url("📱 Telegram", "https://t.me/MrMakeout")
-            .text("⬅️ Menu", "menu")
-        }
-      );
-      break;
-      
-    case "balance":
-      await ctx.editMessageText(
-        "💰 *Bal topla gazan*\\n\\n" +
-        "🎁 Her sargyt ucin bal gazanyň!\\n\\n" +
-        "• 100 TMT sargyt — 5 bal\\n" +
-        "• 500 TMT sargyt — 30 bal\\n" +
-        "• 1000 TMT sargyt — 70 bal\\n\\n" +
-        "🏆 Bal ygnap, arzanlyklar gazanyň!",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: mainMenu
-        }
-      );
-      break;
-      
-    case "menu":
-    case "back":
-      await ctx.editMessageText(
-        "🎉 *Kema Hyzmatlar*\\n\\n" +
-        "Hos geldiniz! Neme satyn almak isleýarsiniz?",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: mainMenu
-        }
-      );
-      break;
-      
-    case "vpn_happ":
-      await ctx.editMessageText(
-        "📱 *Happ VPN*\\n\\n" +
-        "📅 Aylyk — *80 TMT*\\n" +
-        "📆 Hepde — *30 TMT*",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: vpnPaymentMenu("happ")
-        }
-      );
-      break;
-      
-    case "vpn_shadowsocks":
-      await ctx.editMessageText(
-        "🌐 *Shadowsocks VPN*\\n\\n" +
-        "📅 Aylyk — *80 TMT*\\n" +
-        "📆 Hepde — *30 TMT*",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: vpnPaymentMenu("shadowsocks")
-        }
-      );
-      break;
-      
-    case "vpn_outline":
-      await ctx.editMessageText(
-        "🔐 *Outline VPN*\\n\\n" +
-        "📅 Aylyk — *80 TMT*\\n" +
-        "📆 Hepde — *30 TMT*",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: vpnPaymentMenu("outline")
-        }
-      );
-      break;
-      
-    default:
-      // UC order
-      if (data.startsWith("uc_")) {
-        const parts = data.split("_");
-        const uc = parts[1];
-        const tmt = parts[2];
-        await ctx.editMessageText(
-          `💎 *Sargyt*\\n\\n` +
-          `${uc} UC — ${tmt} TMT\\n\\n` +
-          `✅ Sargyt etmek isleýarsinizmi?`,
-          { 
-            parse_mode: "Markdown",
-            reply_markup: new InlineKeyboard()
-              .text("✅ Tassykla", `confirm_${uc}_${tmt}`).row()
-              .text("❌ Yatyr", "uc_menu").row()
-              .text("⬅️ Yza", "menu")
-          }
-        );
-      }
-      // VPN order
-      else if (data.startsWith("vpn_") && data.includes("_monthly")) {
-        const type = data.split("_")[1];
-        await ctx.editMessageText(
-          `🔒 *VPN Sargyt*\\n\\n` +
-          `${type.toUpperCase()} VPN\\n` +
-          `📅 Aylyk — 80 TMT\\n\\n` +
-          `✅ Sargyt etmek isleýarsinizmi?`,
-          { 
-            parse_mode: "Markdown",
-            reply_markup: new InlineKeyboard()
-              .text("✅ Tassykla", `vpn_confirm_${type}_monthly`).row()
-              .text("❌ Yatyr", "vpn_menu").row()
-              .text("⬅️ Yza", "menu")
-          }
-        );
-      }
-      else if (data.startsWith("vpn_") && data.includes("_weekly")) {
-        const type = data.split("_")[1];
-        await ctx.editMessageText(
-          `🔒 *VPN Sargyt*\\n\\n` +
-          `${type.toUpperCase()} VPN\\n` +
-          `📆 Hepde — 30 TMT\\n\\n` +
-          `✅ Sargyt etmek isleýarsinizmi?`,
-          { 
-            parse_mode: "Markdown",
-            reply_markup: new InlineKeyboard()
-              .text("✅ Tassykla", `vpn_confirm_${type}_weekly`).row()
-              .text("❌ Yatyr", "vpn_menu").row()
-              .text("⬅️ Yza", "menu")
-          }
-        );
-      }
-      // Confirm UC
-      else if (data.startsWith("confirm_")) {
-        const parts = data.split("_");
-        const uc = parts[1];
-        const tmt = parts[2];
-        await ctx.editMessageText(
-          `✅ *Sargyt kabul edildi!*\\n\\n` +
-          `💎 ${uc} UC\\n` +
-          `💰 ${tmt} TMT\\n\\n` +
-          `📩 Sargyt tassyklanmak ucin @MrMakeout bilen habarlasyň.`,
-          { 
-            parse_mode: "Markdown",
-            reply_markup: new InlineKeyboard()
-              .url("📱 Habarlas", "https://t.me/MrMakeout")
-              .text("⬅️ Menu", "menu")
-          }
-        );
-      }
-      // Confirm VPN
-      else if (data.startsWith("vpn_confirm_")) {
-        const parts = data.split("_");
-        const type = parts[2];
-        const mode = parts[3];
-        const price = mode === "monthly" ? 80 : 30;
-        await ctx.editMessageText(
-          `✅ *VPN Sargyt kabul edildi!*\\n\\n` +
-          `🔒 ${type.toUpperCase()} VPN\\n` +
-          `📅 ${mode === "monthly" ? "Aylyk" : "Hepde"}\\n` +
-          `💰 ${price} TMT\\n\\n` +
-          `📩 Sargyt tassyklanmak ucin @MrMakeout bilen habarlasyň.`,
-          { 
-            parse_mode: "Markdown",
-            reply_markup: new InlineKeyboard()
-              .url("📱 Habarlas", "https://t.me/MrMakeout")
-              .text("⬅️ Menu", "menu")
-          }
-        );
-      }
-      else {
-        await ctx.answerCallbackQuery("Dusunmedim");
-      }
-  }
-  
-  await ctx.answerCallbackQuery();
+// VPN saýlanynda
+bot.hears(/^(\\d+) aý — (.+) TMT$/, (ctx) => {
+    const period = ctx.match[1];
+    const price = ctx.match[2];
+    ctx.reply(
+        `✅ Saýladynyz: ${period} aý VPN — ${price} TMT\\n\\n` +
+        `🛒 Sargyt etmek üçin "📱 Habarlaş" düwmesine basyň.`,
+        orderMenu
+    );
 });
 
-// Text handler
-bot.on("message:text", async (ctx) => {
-  const text = ctx.message.text.toLowerCase();
-  
-  // UC
-  if (text.includes("uc") || text.includes("pubg")) {
-    let ucText = "💎 *UC Bahalary:*\\n\\n";
-    ucPrices.forEach(item => {
-      ucText += `• ${item.uc} UC — *${item.tmt} TMT*\\n`;
-    });
-    return await ctx.reply(ucText, { 
-      parse_mode: "Markdown",
-      reply_markup: ucMenu()
-    });
-  }
-  
-  // VPN
-  if (text.includes("vpn") || text.includes("internet")) {
-    return await ctx.reply(
-      "🔒 *VPN Hyzmatlary:*\\n\\n" +
-      "📱 Happ\\n" +
-      "🌐 Shadowsocks\\n" +
-      "🔐 Outline\\n\\n" +
-      "📅 Aylyk — *80 TMT*\\n" +
-      "📆 Hepde — *30 TMT*",
-      { 
-        parse_mode: "Markdown",
-        reply_markup: vpnMenu
-      }
-    );
-  }
-  
-  // Salam
-  if (text.includes("salam") || text.includes("hello")) {
-    return await ctx.reply(
-      "👋 *Salam!* Kema Hyzmatlara hos geldiniz!\\n\\n" +
-      "Neme satyn almak isleýarsiniz?",
-      { 
-        parse_mode: "Markdown",
-        reply_markup: mainMenu
-      }
-    );
-  }
-  
-  // Baha
-  if (text.includes("baha") || text.includes("nace")) {
-    return await ctx.reply(
-      "💰 *Bahalar:*\\n\\n" +
-      "💎 UC — /uc basin\\n" +
-      "🔒 VPN — /vpn basin",
-      { 
-        parse_mode: "Markdown",
-        reply_markup: mainMenu
-      }
-    );
-  }
-  
-  // Default
-  await ctx.reply(
-    "🤔 Dusunmedim.\\n\\n" +
-    "📋 /start basyp, komandary gorup bilersiniz.",
-    { reply_markup: mainMenu }
-  );
+// ==================== SARGYT ====================
+bot.hears('🛒 Sargyt', (ctx) => {
+    const text = 
+        '🛒 Sargyt etmek\\n\\n' +
+        'Sargyt etmek üçin aşakdaky maglumatlary iberiň:\\n\\n' +
+        '1️⃣ Harydyn ady (UC / VPN)\\n' +
+        '2️⃣ Mocberi\\n' +
+        '3️⃣ Telefon belgiňiz\\n\\n' +
+        '✉️ ýa-da @MrMakeout bilen habarlaşyň';
+    ctx.reply(text, orderMenu);
 });
 
-bot.start();
-console.log("✅ Kema Hyzmatlar BOT isleyar!");
+// ==================== ŞAHSY OTAG ====================
+bot.hears('👤 Şahsy otag', (ctx) => {
+    const userId = ctx.from.id;
+    const username = ctx.from.username || 'Ýok';
+    const firstName = ctx.from.first_name || 'Ulanyjy';
+    
+    // Bu ýerde database-den okamaly
+    const orders = 0; // Database-den okan zat
+    const balance = 0; // Database-den okan zat
+    
+    const text = 
+        '👤 Şahsy otag\\n\\n' +
+        `🆔 ID: ${userId}\\n` +
+        `👤 Adyňyz: ${firstName}\\n` +
+        `📊 Sargytlaryňyz: ${orders}\\n` +
+        `💰 Bal: ${balance}`;
+    
+    ctx.reply(text, menuWithBack);
+});
+
+// ==================== HABARLAŞ ====================
+bot.hears('📞 Habarlaş', (ctx) => {
+    const text = 
+        '📞 Habarlaş\\n\\n' +
+        '📱 Telegram: @MrMakeout\\n' +
+        '📍 Aşgabat şäheri';
+    ctx.reply(text, contactMenu);
+});
+
+bot.hears('📱 Telegram', (ctx) => {
+    ctx.reply(
+        '🔗 Telegram kanala geçmek üçin aşakdaky baglanyşyga basyň:\\n\\nhttps://t.me/MrMakeout',
+        Markup.inlineKeyboard([
+            Markup.button.url('📱 Telegram', 'https://t.me/MrMakeout'),
+            Markup.button.callback('⬅️ Yza', 'back_to_menu')
+        ])
+    );
+});
+
+// ==================== BAL TOPLA ====================
+bot.hears('💰 Bal topla', (ctx) => {
+    const text = 
+        '💰 Bal topla gazan\\n\\n' +
+        '🎁 Her sargyt üçin bal gazanyň!\\n\\n' +
+        '• 100 TMT sargyt — 5 bal\\n' +
+        '• 500 TMT sargyt — 30 bal\\n' +
+        '• 1000 TMT sargyt — 70 bal\\n\\n' +
+        '🏆 Bal ygnap, arzanlyklar gazanyň!';
+    ctx.reply(text, menuWithBack);
+});
+
+// ==================== YZA / MENU ====================
+bot.hears('⬅️ Yza', (ctx) => {
+    sendWelcome(ctx);
+});
+
+bot.hears('⬅️ Menu', (ctx) => {
+    sendWelcome(ctx);
+});
+
+bot.action('back_to_menu', (ctx) => {
+    ctx.deleteMessage();
+    sendWelcome(ctx);
+});
+
+// ==================== WAGT ====================
+bot.command('wagt', (ctx) => {
+    const now = new Date();
+    const date = now.toLocaleDateString('tr-TR');
+    const time = now.toLocaleTimeString('tr-TR');
+    ctx.reply(`🕐 Aşgabat wagty: ${date}, ${time}`);
+});
+
+// ==================== BAHA ====================
+bot.command('baha', (ctx) => {
+    ctx.reply('💰 Bahalar 50 manatdan başlaýar.\\n\\nEsasy menýudan görüp bilersiňiz.', mainMenu);
+});
+
+// ==================== INLINE CALLBACKS ====================
+bot.action('uc_buy', (ctx) => {
+    ctx.deleteMessage();
+    let text = '💎 UC Bahalary:\\n\\n';
+    for (const [uc, price] of Object.entries(ucPrices)) {
+        text += `• ${uc} — ${price}\\n`;
+    }
+    text += '\\n🛒 Sargyt etmek üçin UC saýlaň:';
+    ctx.reply(text, ucMenu);
+});
+
+// ==================== ERROR HANDLING ====================
+bot.catch((err, ctx) => {
+    console.error(`Error for ${ctx.updateType}:`, err);
+    ctx.reply('❌ Ýalňyşlyk ýüze çykdy. Täzeden synanyşyň.', mainMenu);
+});
+
+// ==================== LAUNCH ====================
+bot.launch();
+
+// Graceful shutdown
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
+
+console.log('✅ Bot işe başlady!');
+'''
+
+with open('/mnt/agents/output/bot.js', 'w', encoding='utf-8') as f:
+    f.write(bot_code)
+
+print("✅ bot.js tayyar!")
