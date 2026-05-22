@@ -1,11 +1,66 @@
-{
-  "name": "turkmen-bot-telegram",
+
+# package.json hem gerek
+dependencies = '''{
+  "name": "kema-hyzmatlar-bot",
   "version": "1.0.0",
-  "type": "module",
+  "description": "Kema Hyzmatlar Telegram Bot",
+  "main": "bot.js",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node bot.js",
+    "dev": "nodemon bot.js"
   },
   "dependencies": {
-    "grammy": "^1.21.1"
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }
+'''
+
+with open('/mnt/agents/output/package.json', 'w', encoding='utf-8') as f:
+    f.write(dependencies)
+
+# README hem
+dependencies = '''# Kema Hyzmatlar Bot
+
+Telegram bot - UC, VPN satyn almak üçin.
+
+## Gurnamak
+
+```bash
+npm install
+```
+
+## Işe başlamak
+
+1. `bot.js` içinde `YOUR_BOT_TOKEN` ýerine öz bot tokeniňizi ýazyň
+2. Botu işe başlaň:
+
+```bash
+npm start
+```
+
+## Komandalar
+
+| Komanda | Düşündiriş |
+|---------|-----------|
+| `/start` | Botu işe başlaň |
+| `/salam` | Salamlama |
+| `/wagt` | Aşgabat wagty |
+| `/baha` | Baha maglumaty |
+
+## Menýu
+
+- 💎 UC satyn al
+- 🔒 VPN satyn al
+- 🛒 Sargyt
+- 👤 Şahsy otag
+- 📞 Habarlaş
+- 💰 Bal topla
+'''
+
+with open('/mnt/agents/output/README.md', 'w', encoding='utf-8') as f:
+    f.write(dependencies)
+
+print("✅ Hemme faýllar tayyar!")
