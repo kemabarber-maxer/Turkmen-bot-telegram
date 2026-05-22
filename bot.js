@@ -1,6 +1,6 @@
 import { Bot } from "grammy";
 ‎
-‎const bot = new Bot("SIZIN_BOT_TOKENI_BU_YERE");
+‎const bot = new Bot("8836556532:AAEggdrCWkRfskzg-sPg8T9Xhdey44LPy9s");
 ‎
 ‎const jogaplar = {
 ‎  "salam": "Salam! men online dal bolsam +99362237781 jan edin",
