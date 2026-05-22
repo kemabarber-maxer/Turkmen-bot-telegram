@@ -60,45 +60,6 @@ function vpnPaymentMenu(type) {
     .text("⬇️ Yza", "vpn_menu");
 }
 
-bot.command("start", async (ctx) => {
-  const user = ctx.from;
-  await ctx.reply(
-    "🎉 *Kema Hyzmatlar*\\n\\n" +
-    "Hos geldiniz! Neme satyn almak isleyarsiniz?\\n\\n" +
-    `👤 *ID-niz:* ${user.id}\\n` +
-    `💰 *Elyeter:* 0.0 TMT\\n` +
-    `🧊 *Dondurulan:* 0.0 TMT`,
-    { 
-      parse_mode: "Markdown",
-      reply_markup: mainMenu
-    }
-  );
-});
-
-bot.command("uc", async (ctx) => {
-  let text = "💎 *UC Bahalary:*\\n\\n";
-  ucPrices.forEach(item => {
-    text += `• ${item.uc} UC — *${item.tmt} TMT*\\n`;
-  });
-  text += "\\n🛒 Sargyt etmek ucin UC saylan:";
-  
-  await ctx.reply(text, { 
-    parse_mode: "Markdown",
-    reply_markup: ucMenu()
-  });
-});
-
-bot.command("vpn", async (ctx) => {
-  await ctx.reply(
-    "🔒 *VPN Hyzmatlary:*\\n\\n" +
-    "Hyzmat saylan:",
-    { 
-      parse_mode: "Markdown",
-      reply_markup: vpnMenu()
-    }
-  );
-});
-
 async function sendAdminOrder(ctx, product, price, details = "") {
   const user = ctx.from;
   const now = new Date().toLocaleString("tk-TM", {
@@ -110,15 +71,15 @@ async function sendAdminOrder(ctx, product, price, details = "") {
   });
   
   const adminMessage = 
-    `📦 *Taze sargyt!*\\n\\n` +
-    `👤 *Musteri:* ${user.first_name || "Belli dal"}\\n` +
-    `🆔 *ID:* ${user.id}\\n` +
-    `📱 *Telefon:* +993XXXXXXXX\\n` +
-    `👤 *Username:* @${user.username || "Yok"}\\n\\n` +
-    `📦 *Haryt:* ${product}\\n` +
-    `💰 *Baha:* ${price} TMT\\n` +
-    `${details ? `📝 *Maglumat:* ${details}\\n` : ""}` +
-    `⏰ *Wagt:* ${now}`;
+    `📦 Taze sargyt!\n\n` +
+    `👤 Musteri: ${user.first_name || "Belli dal"}\n` +
+    `🆔 ID: ${user.id}\n` +
+    `📱 Telefon: +993XXXXXXXX\n` +
+    `👤 Username: @${user.username || "Yok"}\n\n` +
+    `📦 Haryt: ${product}\n` +
+    `💰 Baha: ${price} TMT\n` +
+    `${details ? `📝 Maglumat: ${details}\n` : ""}` +
+    `⏰ Wagt: ${now}`;
   
   try {
     await bot.api.sendMessage(ADMIN_ID, adminMessage, { parse_mode: "Markdown" });
@@ -127,17 +88,56 @@ async function sendAdminOrder(ctx, product, price, details = "") {
   }
 }
 
+bot.command("start", async (ctx) => {
+  const user = ctx.from;
+  await ctx.reply(
+    "🎉 Kema Hyzmatlar\n\n" +
+    "Hos geldiniz! Neme satyn almak isleyarsiniz?\n\n" +
+    `👤 ID-niz: ${user.id}\n` +
+    `💰 Elyeter: 0.0 TMT\n` +
+    `🧊 Dondurulan: 0.0 TMT`,
+    { 
+      parse_mode: "Markdown",
+      reply_markup: mainMenu
+    }
+  );
+});
+
+bot.command("uc", async (ctx) => {
+  let text = "💎 UC Bahalary:\n\n";
+  ucPrices.forEach(item => {
+    text += `• ${item.uc} UC — ${item.tmt} TMT\n`;
+  });
+  text += "\n🛒 Sargyt etmek ucin UC saylan:";
+  
+  await ctx.reply(text, { 
+    parse_mode: "Markdown",
+    reply_markup: ucMenu()
+  });
+});
+
+bot.command("vpn", async (ctx) => {
+  await ctx.reply(
+    "🔒 VPN Hyzmatlary:\n\n" +
+    "Hyzmat saylan:",
+    { 
+      parse_mode: "Markdown",
+      reply_markup: vpnMenu()
+    }
+  );
+});
+
 bot.on("callback_query:data", async (ctx) => {
   const data = ctx.callbackQuery.data;
   const user = ctx.from;
   
   switch(data) {
     case "uc_menu":
-      let ucText = "💎 *UC Bahalary:*\\n\\n";
+      let ucText = "💎 UC Bahalary:\n\n";
       ucPrices.forEach(item => {
-        ucText += `• ${item.uc} UC — *${item.tmt} TMT*\\n`;
+        ucText += `• ${item.uc} UC — ${item.tmt} TMT\n`;
       });
-      ucText += "\\n🛒 Sargyt etmek ucin UC saylan:";
+      ucText += "\n🛒 Sargyt etmek ucin UC saylan:";
       
       await ctx.editMessageText(ucText, { 
         parse_mode: "Markdown",
@@ -147,7 +147,7 @@ bot.on("callback_query:data", async (ctx) => {
       
     case "vpn_menu":
       await ctx.editMessageText(
-        "🔒 *VPN Hyzmatlary:*\\n\\n" +
+        "🔒 VPN Hyzmatlary:\n\n" +
         "Hyzmat saylan:",
         { 
           parse_mode: "Markdown",
@@ -158,10 +158,10 @@ bot.on("callback_query:data", async (ctx) => {
       
     case "order":
       await ctx.editMessageText(
-        "🛒 *Sargyt etmek*\\n\\n" +
-        "Sargyt etmek ucin asakdaky maglumatlary iberin:\\n\\n" +
-        "1️⃣ Harydyn ady (UC / VPN)\\n" +
-        "2️⃣ Mocberi\\n" +
+        "🛒 Sargyt etmek\n\n" +
+        "Sargyt etmek ucin asakdaky maglumatlary iberin:\n\n" +
+        "1️⃣ Harydyn ady (UC / VPN)\n" +
+        "2️⃣ Mocberi\n" +
         "3️⃣ Telefon belginiz",
         { 
           parse_mode: "Markdown",
@@ -176,15 +176,15 @@ bot.on("callback_query:data", async (ctx) => {
     case "personal":
       const refLink = `https://t.me/${ctx.me.username}?start=${user.id}`;
       await ctx.editMessageText(
-        "👤 *Sahsy otag*\\n\\n" +
-        `🆔 ID-niz: ${user.id}\\n` +
-        `👤 Adynyz: ${user.first_name || "Belli dal"}\\n\\n` +
-        "💰 *Elyeter hasap:* 0.0 TMT\\n" +
-        "🧊 *Dondurulan:* 0.0 TMT\\n" +
-        "🔒 *Gorag parol:* ✅\\n" +
-        "📱 *TMCELL parol:* ❌\\n\\n" +
-        `👥 *Referal ssylka:*\\n${refLink}\\n\\n` +
-        "Sizde 0 referal bar.\\n" +
+        "👤 Sahsy otag\n\n" +
+        `🆔 ID-niz: ${user.id}\n` +
+        `👤 Adynyz: ${user.first_name || "Belli dal"}\n\n` +
+        "💰 Elyeter hasap: 0.0 TMT\n" +
+        "🧊 Dondurulan: 0.0 TMT\n" +
+        "🔒 Gorag parol: ✅\n" +
+        "📱 TMCELL parol: ❌\n\n" +
+        `👥 Referal ssylka:\n${refLink}\n\n` +
+        "Sizde 0 referal bar.\n" +
         "Referal hasap: 0.0 TMT",
         { 
           parse_mode: "Markdown",
@@ -199,8 +199,8 @@ bot.on("callback_query:data", async (ctx) => {
       
     case "contact":
       await ctx.editMessageText(
-        "📞 *Habarlas*\\n\\n" +
-        "📱 Telegram: @kemabest77\\n" +
+        "📞 Habarlas\n\n" +
+        "📱 Telegram: @kemabest77\n" +
         "📍 Asgabat saheri",
         { 
           parse_mode: "Markdown",
@@ -213,11 +213,11 @@ bot.on("callback_query:data", async (ctx) => {
       
     case "balance":
       await ctx.editMessageText(
-        "💰 *Bal topla gazan*\\n\\n" +
-        "🎁 Her sargyt ucin bal gazanyn!\\n\\n" +
-        "• 100 TMT sargyt — 5 bal\\n" +
-        "• 500 TMT sargyt — 30 bal\\n" +
-        "• 1000 TMT sargyt — 70 bal\\n\\n" +
+        "💰 Bal topla gazan\n\n" +
+        "🎁 Her sargyt ucin bal gazanyn!\n\n" +
+        "• 100 TMT sargyt — 5 bal\n" +
+        "• 500 TMT sargyt — 30 bal\n" +
+        "• 1000 TMT sargyt — 70 bal\n\n" +
         "🏆 Bal ygnap, arzanlyklar gazanyn!",
         { 
           parse_mode: "Markdown",
@@ -229,11 +229,11 @@ bot.on("callback_query:data", async (ctx) => {
     case "menu":
     case "back":
       await ctx.editMessageText(
-        "🎉 *Kema Hyzmatlar*\\n\\n" +
-        "Hos geldiniz! Neme satyn almak isleyarsiniz?\\n\\n" +
-        `👤 *ID-niz:* ${user.id}\\n` +
-        `💰 *Elyeter:* 0.0 TMT\\n` +
-        `🧊 *Dondurulan:* 0.0 TMT`,
+        "🎉 Kema Hyzmatlar\n\n" +
+        "Hos geldiniz! Neme satyn almak isleyarsiniz?\n\n" +
+        `👤 ID-niz: ${user.id}\n` +
+        `💰 Elyeter: 0.0 TMT\n` +
+        `🧊 Dondurulan: 0.0 TMT`,
         { 
           parse_mode: "Markdown",
           reply_markup: mainMenu
@@ -243,9 +243,9 @@ bot.on("callback_query:data", async (ctx) => {
       
     case "vpn_Happ":
       await ctx.editMessageText(
-        "📱 *Happ VPN*\\n\\n" +
-        "📅 Aylyk — *80 TMT*\\n" +
-        "📆 Hepde — *30 TMT*",
+        "📱 Happ VPN\n\n" +
+        "📅 Aylyk — 80 TMT\n" +
+        "📆 Hepde — 30 TMT",
         { 
           parse_mode: "Markdown",
           reply_markup: vpnPaymentMenu("Happ")
@@ -255,9 +255,9 @@ bot.on("callback_query:data", async (ctx) => {
       
     case "vpn_Shadowsocks":
       await ctx.editMessageText(
-        "🌐 *Shadowsocks VPN*\\n\\n" +
-        "📅 Aylyk — *80 TMT*\\n" +
-        "📆 Hepde — *30 TMT*",
+        "🌐 Shadowsocks VPN\n\n" +
+        "📅 Aylyk — 80 TMT\n" +
+        "📆 Hepde — 30 TMT",
         { 
           parse_mode: "Markdown",
           reply_markup: vpnPaymentMenu("Shadowsocks")
@@ -267,9 +267,9 @@ bot.on("callback_query:data", async (ctx) => {
       
     case "vpn_Outline":
       await ctx.editMessageText(
-        "🔐 *Outline VPN*\\n\\n" +
-        "📅 Aylyk — *80 TMT*\\n" +
-        "📆 Hepde — *30 TMT*",
+        "🔐 Outline VPN\n\n" +
+        "📅 Aylyk — 80 TMT\n" +
+        "📆 Hepde — 30 TMT",
         { 
           parse_mode: "Markdown",
           reply_markup: vpnPaymentMenu("Outline")
@@ -286,10 +286,10 @@ bot.on("callback_query:data", async (ctx) => {
         await sendAdminOrder(ctx, `${uc} UC`, tmt, `UC sargyt: ${uc} UC`);
         
         await ctx.editMessageText(
-          `✅ *Sargyt kabul edildi!*\\n\\n` +
-          `💎 ${uc} UC\\n` +
-          `💰 ${tmt} TMT\\n\\n` +
-          `📩 Admina iberildi: @kemabest77\\n\\n` +
+          `✅ Sargyt kabul edildi!\n\n` +
+          `💎 ${uc} UC\n` +
+          `💰 ${tmt} TMT\n\n` +
+          `📩 Admina iberildi: @kemabest77\n\n` +
           `📱 Admina yazmak ucin asakdaky butona basin:`,
           { 
             parse_mode: "Markdown",
@@ -305,11 +305,11 @@ bot.on("callback_query:data", async (ctx) => {
         await sendAdminOrder(ctx, `${type} VPN`, "80", `VPN: ${type} (Aylyk)`);
         
         await ctx.editMessageText(
-          `✅ *VPN Sargyt kabul edildi!*\\n\\n` +
-          `🔒 ${type} VPN\\n` +
-          `📅 Aylyk\\n` +
-          `💰 80 TMT\\n\\n` +
-          `📩 Admina iberildi: @kemabest77\\n\\n` +
+          `✅ VPN Sargyt kabul edildi!\n\n` +
+          `🔒 ${type} VPN\n` +
+          `📅 Aylyk\n` +
+          `💰 80 TMT\n\n` +
+          `📩 Admina iberildi: @kemabest77\n\n` +
           `📱 Admina yazmak ucin asakdaky butona basin:`,
           { 
             parse_mode: "Markdown",
@@ -325,11 +325,11 @@ bot.on("callback_query:data", async (ctx) => {
         await sendAdminOrder(ctx, `${type} VPN`, "30", `VPN: ${type} (Hepde)`);
         
         await ctx.editMessageText(
-          `✅ *VPN Sargyt kabul edildi!*\\n\\n` +
-          `🔒 ${type} VPN\\n` +
-          `📆 Hepde\\n` +
-          `💰 30 TMT\\n\\n` +
-          `📩 Admina iberildi: @kemabest77\\n\\n` +
+          `✅ VPN Sargyt kabul edildi!\n\n` +
+          `🔒 ${type} VPN\n` +
+          `📆 Hepde\n` +
+          `💰 30 TMT\n\n` +
+          `📩 Admina iberildi: @kemabest77\n\n` +
           `📱 Admina yazmak ucin asakdaky butona basin:`,
           { 
             parse_mode: "Markdown",
@@ -351,9 +351,9 @@ bot.on("message:text", async (ctx) => {
   const text = ctx.message.text.toLowerCase();
   
   if (text.includes("uc") || text.includes("pubg")) {
-    let ucText = "💎 *UC Bahalary:*\\n\\n";
+    let ucText = "💎 UC Bahalary:\n\n";
     ucPrices.forEach(item => {
-      ucText += `• ${item.uc} UC — *${item.tmt} TMT*\\n`;
+      ucText += `• ${item.uc} UC — ${item.tmt} TMT\n`;
     });
     return await ctx.reply(ucText, { 
       parse_mode: "Markdown",
@@ -363,12 +363,12 @@ bot.on("message:text", async (ctx) => {
   
   if (text.includes("vpn") || text.includes("internet")) {
     return await ctx.reply(
-      "🔒 *VPN Hyzmatlary:*\\n\\n" +
-      "📱 Happ\\n" +
-      "🌐 Shadowsocks\\n" +
-      "🔐 Outline\\n\\n" +
-      "📅 Aylyk — *80 TMT*\\n" +
-      "📆 Hepde — *30 TMT*",
+      "🔒 VPN Hyzmatlary:\n\n" +
+      "📱 Happ\n" +
+      "🌐 Shadowsocks\n" +
+      "🔐 Outline\n\n" +
+      "📅 Aylyk — 80 TMT\n" +
+      "📆 Hepde — 30 TMT",
       { 
         parse_mode: "Markdown",
         reply_markup: vpnMenu()
@@ -378,7 +378,7 @@ bot.on("message:text", async (ctx) => {
   
   if (text.includes("salam") || text.includes("hello")) {
     return await ctx.reply(
-      "👋 *Salam!* Kema Hyzmatlara hos geldiniz!\\n\\n" +
+      "👋 Salam! Kema Hyzmatlara hos geldiniz!\n\n" +
       "Neme satyn almak isleyarsiniz?",
       { 
         parse_mode: "Markdown",
@@ -388,7 +388,7 @@ bot.on("message:text", async (ctx) => {
   }
   
   await ctx.reply(
-    "🤔 Dusunmedim.\\n\\n" +
+    "🤔 Dusunmedim.\n\n" +
     "📋 /start basyp, komandary gorup bilersiniz.",
     { reply_markup: mainMenu }
   );
@@ -397,3 +397,4 @@ bot.on("message:text", async (ctx) => {
 bot.start();
 console.log("✅ Kema Hyzmatlar BOT isleyar!");
 console.log(`📱 Admin: @kemabest77`);
+      
