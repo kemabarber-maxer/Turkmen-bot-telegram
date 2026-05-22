@@ -1,6 +1,6 @@
 import { Bot } from "grammy";
 
-const bot = new Bot(process.env.BOT_TOKEN);
+const bot = new Bot("8836556532:AAEggdrCWkRfskzg-sPg8T9Xhdey44LPy9s");
 
 const jogaplar = {
   "salam": "Salam! men online dal bolsam sms yazyn +99362237781",
