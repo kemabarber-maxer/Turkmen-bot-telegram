@@ -3,7 +3,7 @@ import { Bot } from "grammy";
 const bot = new Bot(process.env.BOT_TOKEN);
 
 const jogaplar = {
-  "salam": "Salam! men online dal bol...",
+  "salam": "Salam! men online dal bolsam +99362237781 jan edin",
   "nähili": "Men gowy, sag bolun!",
   "bahasy": "50 manatdan baslayar.",
   "wagt": "Asgabat wagty: " + new Date().toLocaleString("tk-TM", {timeZone: "Asia/Ashgabat"}),
