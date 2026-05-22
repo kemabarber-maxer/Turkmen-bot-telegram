@@ -1,16 +1,11 @@
 {
-  "name": "kema-hyzmatlar-bot",
+  "name": "turkmen-bot-telegram",
   "version": "1.0.0",
-  "description": "Kema Hyzmatlar Telegram Bot",
-  "main": "bot.js",
+  "type": "module",
   "scripts": {
-    "start": "node bot.js",
-    "dev": "nodemon bot.js"
+    "start": "node bot.js"
   },
   "dependencies": {
-    "telegraf": "^4.16.3"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.0"
+    "grammy": "^1.21.1"
   }
 }
