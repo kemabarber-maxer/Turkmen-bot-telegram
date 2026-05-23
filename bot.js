@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const bot = new Bot("8836556532:AAEggdrCWkRfskzg-sPg8T9Xhdey44LPy9s");
-const ADMIN_ID = 8375820047; // San ID (mysal: "123456789")
+const ADMIN_ID = "8375820047"; // San ID (mysal: "123456789")
 
 const ucPrices = [
   { uc: 60, tmt: 23 },
