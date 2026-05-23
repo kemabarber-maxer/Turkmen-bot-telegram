@@ -1,4 +1,5 @@
-import { Bot, Keyboard, InlineKeyboard } from "grammy";
+
+code = '''import { Bot, Keyboard, InlineKeyboard } from "grammy";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -126,6 +127,18 @@ function adminInlineKeyboard() {
   return new InlineKeyboard().url("📱 Admina ýaz", `https://t.me/${ADMIN_USERNAME}`);
 }
 
+function copyOrderText(user, product, price, phone, details, time) {
+  return `📦 Täze sargyt!\n\n` +
+    `👤 Müşderi: ${user.first_name || "Belli däl"}\n` +
+    `🆔 ID: ${user.id}\n` +
+    `👤 Username: @${user.username || "Ýok"}\n` +
+    `📱 Telefon: ${phone}\n\n` +
+    `📦 Haryt: ${product}\n` +
+    `💰 Bahasy: ${price} TMT\n` +
+    `📝 Maglumat: ${details}\n` +
+    `⏰ Wagt: ${time}`;
+}
+
 async function sendAdminOrder(ctx, product, price, details = "") {
   const user = ctx.from;
   const now = new Date().toLocaleString("tk-TM", {
@@ -139,23 +152,14 @@ async function sendAdminOrder(ctx, product, price, details = "") {
 
   const phone = userPhones.get(user.id) || "Ýok";
 
-  const adminMessage =
-    `📦 Täze sargyt!\n\n` +
-    `👤 Müşderi: ${user.first_name || "Belli däl"}\n` +
-    `🆔 ID: ${user.id}\n` +
-    `👤 Username: @${user.username || "Ýok"}\n` +
-    `📱 Telefon: ${phone}\n\n` +
-    `📦 Haryt: ${product}\n` +
-    `💰 Bahasy: ${price} TMT\n` +
-    `${details ? `📝 Maglumat: ${details}\n` : ""}` +
-    `⏰ Wagt: ${now}`;
+  const adminMessage = copyOrderText(user, product, price, phone, details, now);
 
   try {
     await bot.api.sendMessage(ADMIN_ID, adminMessage);
-    return true;
+    return { success: true, time: now, phone };
   } catch (e) {
     console.error("Admina SMS ugradylmady:", e.message);
-    return false;
+    return { success: false, time: now, phone };
   }
 }
 
@@ -177,7 +181,6 @@ bot.command("start", async (ctx) => {
 
 bot.hears("💎 UC satyn al", async (ctx) => {
   setUserState(ctx.from.id, { menu: "uc_payment_type" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     "🤔 Haýsy görnüş bilen tölegi geçirmek isleýärsiňiz?\n\n" +
@@ -191,7 +194,6 @@ bot.hears("💰 Nagt", async (ctx) => {
   const state = getUserState(ctx.from.id);
   if (state.menu !== "uc_payment_type") return;
   setUserState(ctx.from.id, { menu: "uc_list", paymentType: "nagt" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     "🛒 Sargyt etmek üçin UC saýlaň:",
@@ -203,7 +205,6 @@ bot.hears("📞 Telefona", async (ctx) => {
   const state = getUserState(ctx.from.id);
   if (state.menu !== "uc_payment_type") return;
   setUserState(ctx.from.id, { menu: "uc_list", paymentType: "telefon" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     "🛒 Sargyt etmek üçin UC saýlaň:",
@@ -218,7 +219,6 @@ ucPrices.forEach((item) => {
     
     setUserState(ctx.from.id, { menu: "uc_phone", uc: item.uc, tmt: item.tmt, paymentType: state.paymentType });
     
-    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
     await sendAndTrack(
       ctx,
       `📱 Telefon belgiňizi ýazyň:\n\n` +
@@ -230,7 +230,6 @@ ucPrices.forEach((item) => {
 
 bot.hears("🔒 VPN satyn al", async (ctx) => {
   setUserState(ctx.from.id, { menu: "vpn_list" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     "🔒 VPN Hyzmatlary:\n\nHyzmat saýlaň:",
@@ -243,7 +242,6 @@ vpnTypes.forEach((type) => {
     const state = getUserState(ctx.from.id);
     if (state.menu !== "vpn_list") return;
     setUserState(ctx.from.id, { menu: "vpn_payment", vpnType: type.name });
-    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
     await sendAndTrack(
       ctx,
       `${type.icon} ${type.name} VPN\n\n` +
@@ -261,7 +259,6 @@ vpnTypes.forEach((type) => {
     
     setUserState(ctx.from.id, { menu: "vpn_phone", vpnType: type.name, price: "80", period: "Aýlyk" });
     
-    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
     await sendAndTrack(
       ctx,
       `📱 Telefon belgiňizi ýazyň:\n\n` +
@@ -276,7 +273,6 @@ vpnTypes.forEach((type) => {
     
     setUserState(ctx.from.id, { menu: "vpn_phone", vpnType: type.name, price: "30", period: "Hepde" });
     
-    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
     await sendAndTrack(
       ctx,
       `📱 Telefon belgiňizi ýazyň:\n\n` +
@@ -288,7 +284,6 @@ vpnTypes.forEach((type) => {
 
 bot.hears("🛒 Sargyt et", async (ctx) => {
   setUserState(ctx.from.id, { menu: "order" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     "🛒 Sargyt etmek\n\n" +
@@ -304,7 +299,6 @@ bot.hears("💎 UC sayla", async (ctx) => {
   const state = getUserState(ctx.from.id);
   if (state.menu !== "order") return;
   setUserState(ctx.from.id, { menu: "uc_payment_type" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     "🤔 Haýsy görnüş bilen tölegi geçirmek isleýärsiňiz?\n\n" +
@@ -318,7 +312,6 @@ bot.hears("🔒 VPN sayla", async (ctx) => {
   const state = getUserState(ctx.from.id);
   if (state.menu !== "order") return;
   setUserState(ctx.from.id, { menu: "vpn_list" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     "🔒 VPN Hyzmatlary:\n\nHyzmat saýlaň:",
@@ -328,7 +321,6 @@ bot.hears("🔒 VPN sayla", async (ctx) => {
 
 bot.hears("👤 Şahsy otag", async (ctx) => {
   setUserState(ctx.from.id, { menu: "personal" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   const user = ctx.from;
   const refLink = `https://t.me/${ctx.me.username}?start=${user.id}`;
   const hasPassword = userPasswords.has(user.id) ? "✅" : "❌";
@@ -348,7 +340,6 @@ bot.hears("👤 Şahsy otag", async (ctx) => {
 
 bot.hears("📞 Habarlaş", async (ctx) => {
   setUserState(ctx.from.id, { menu: "contact" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     "📞 Habarlaş\n\n" +
@@ -362,7 +353,6 @@ bot.hears("📞 Habarlaş", async (ctx) => {
 
 bot.hears("💰 Bal topla", async (ctx) => {
   setUserState(ctx.from.id, { menu: "balance" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     "💰 Bal topla / Gazan\n\n" +
@@ -381,13 +371,11 @@ bot.hears("💰 Bal topla", async (ctx) => {
 
 bot.hears("⬇️ Esasy menýu", async (ctx) => {
   setUserState(ctx.from.id, { menu: "main" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendMainMenu(ctx);
 });
 
 bot.hears("⬇️ Yza", async (ctx) => {
   const state = getUserState(ctx.from.id);
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   switch (state.menu) {
     case "uc_list":
     case "uc_order_done":
@@ -445,7 +433,6 @@ bot.hears("⬇️ Yza", async (ctx) => {
 });
 
 bot.hears("📱 Admina ýaz", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     `📱 Admin bilen habarlaşmak üçin @${ADMIN_USERNAME} ýazaýyň.`,
@@ -456,7 +443,6 @@ bot.hears("📱 Admina ýaz", async (ctx) => {
 
 bot.hears("✏️ Parol üýtget", async (ctx) => {
   setUserState(ctx.from.id, { menu: "password_change", step: "waiting" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     "✏️ Gorag paroly üýtgetmek\n\n" +
@@ -467,7 +453,6 @@ bot.hears("✏️ Parol üýtget", async (ctx) => {
 
 bot.hears("🔐 TMCELL parol", async (ctx) => {
   setUserState(ctx.from.id, { menu: "tmcell_set", step: "waiting" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     "🔐 TMCELL parol düzmek\n\n" +
@@ -478,7 +463,6 @@ bot.hears("🔐 TMCELL parol", async (ctx) => {
 
 bot.hears("💰 Çykarmak", async (ctx) => {
   setUserState(ctx.from.id, { menu: "withdraw", step: "waiting" });
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     "💰 Referal hasapdan çykarmak\n\n" +
@@ -498,15 +482,23 @@ bot.on("message:text", async (ctx) => {
     const tmt = state.tmt;
     const paymentType = state.paymentType === "telefon" ? "Telefona" : "Nagt";
     
-    const sent = await sendAdminOrder(
+    const result = await sendAdminOrder(
       ctx,
       `${uc} UC`,
       tmt,
       `UC sargyt: ${uc} UC | Töleg: ${paymentType}`
     );
 
-    if (sent) {
-      await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+    const orderText = copyOrderText(
+      ctx.from,
+      `${uc} UC`,
+      tmt,
+      text,
+      `UC sargyt: ${uc} UC | Töleg: ${paymentType}`,
+      result.time
+    );
+
+    if (result.success) {
       await sendAndTrack(
         ctx,
         `✅ Sargyt kabul edildi!\n\n` +
@@ -514,19 +506,24 @@ bot.on("message:text", async (ctx) => {
         `💰 ${tmt} TMT\n` +
         `💳 Töleg görnüşi: ${paymentType}\n` +
         `📱 Telefon: ${text}\n\n` +
+        `📋 Sargyt maglumatlary:\n` +
+        `\`\`\`${orderText}\`\`\`\n\n` +
         `📩 Admina iberildi`,
         {
           reply_markup: adminInlineKeyboard(),
+          parse_mode: "Markdown",
         }
       );
     } else {
-      await ctx.reply("⏳", { reply_markup: removeKeyboard() });
       await sendAndTrack(
         ctx,
-        "⚠️ Sargyt kabul edildi, ýöne admina habar bermekde kynçylyk çykdy.\n" +
+        `⚠️ Sargyt kabul edildi, ýöne admina habar bermekde kynçylyk çykdy.\n\n` +
+        `📋 Sargyt maglumatlary (kopyalap ugratmak üçin):\n` +
+        `\`\`\`${orderText}\`\`\`\n\n` +
         `📱 Haýyş, özüňiz @${ADMIN_USERNAME} bilen habarlaşyň.`,
         {
           reply_markup: adminInlineKeyboard(),
+          parse_mode: "Markdown",
         }
       );
     }
@@ -541,15 +538,23 @@ bot.on("message:text", async (ctx) => {
     const price = state.price;
     const period = state.period;
     
-    const sent = await sendAdminOrder(
+    const result = await sendAdminOrder(
       ctx,
       `${vpnType} VPN`,
       price,
       `VPN: ${vpnType} (${period})`
     );
 
-    if (sent) {
-      await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+    const orderText = copyOrderText(
+      ctx.from,
+      `${vpnType} VPN`,
+      price,
+      text,
+      `VPN: ${vpnType} (${period})`,
+      result.time
+    );
+
+    if (result.success) {
       await sendAndTrack(
         ctx,
         `✅ VPN Sargyt kabul edildi!\n\n` +
@@ -557,19 +562,24 @@ bot.on("message:text", async (ctx) => {
         `📅 ${period}\n` +
         `💰 ${price} TMT\n` +
         `📱 Telefon: ${text}\n\n` +
+        `📋 Sargyt maglumatlary:\n` +
+        `\`\`\`${orderText}\`\`\`\n\n` +
         `📩 Admina iberildi`,
         {
           reply_markup: adminInlineKeyboard(),
+          parse_mode: "Markdown",
         }
       );
     } else {
-      await ctx.reply("⏳", { reply_markup: removeKeyboard() });
       await sendAndTrack(
         ctx,
-        "⚠️ Sargyt kabul edildi, ýöne admina habar bermekde kynçylyk çykdy.\n" +
+        `⚠️ Sargyt kabul edildi, ýöne admina habar bermekde kynçylyk çykdy.\n\n` +
+        `📋 Sargyt maglumatlary (kopyalap ugratmak üçin):\n` +
+        `\`\`\`${orderText}\`\`\`\n\n` +
         `📱 Haýyş, özüňiz @${ADMIN_USERNAME} bilen habarlaşyň.`,
         {
           reply_markup: adminInlineKeyboard(),
+          parse_mode: "Markdown",
         }
       );
     }
@@ -578,9 +588,8 @@ bot.on("message:text", async (ctx) => {
   }
 
   if (state.menu === "password_change" && state.step === "waiting") {
-    if (text.length >= 4 && text.length <= 8 && /^\d+$/.test(text)) {
+    if (text.length >= 4 && text.length <= 8 && /^\\d+$/.test(text)) {
       userPasswords.set(ctx.from.id, text);
-      await ctx.reply("⏳", { reply_markup: removeKeyboard() });
       await sendAndTrack(
         ctx,
         "✅ Parol üýtgedildi!\n\n" +
@@ -589,7 +598,6 @@ bot.on("message:text", async (ctx) => {
       );
       setUserState(ctx.from.id, { menu: "personal" });
     } else {
-      await ctx.reply("⏳", { reply_markup: removeKeyboard() });
       await sendAndTrack(
         ctx,
         "⚠️ Parol 4-8 san aralygynda bolmaly.\n" +
@@ -602,7 +610,6 @@ bot.on("message:text", async (ctx) => {
 
   if (state.menu === "tmcell_set" && state.step === "waiting") {
     userTmcell.set(ctx.from.id, text);
-    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
     await sendAndTrack(
       ctx,
       "✅ TMCELL parol ýatda saklandy!",
@@ -615,7 +622,6 @@ bot.on("message:text", async (ctx) => {
   if (state.menu === "withdraw" && state.step === "waiting") {
     const amount = parseFloat(text);
     if (isNaN(amount) || amount <= 0) {
-      await ctx.reply("⏳", { reply_markup: removeKeyboard() });
       await sendAndTrack(
         ctx,
         "⚠️ Dogry mukdar ýazyň.\n" +
@@ -625,7 +631,6 @@ bot.on("message:text", async (ctx) => {
       return;
     }
     await sendAdminOrder(ctx, "Çykarmak", amount.toString(), `Referal hasapdan çykarmak: ${amount} TMT`);
-    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
     await sendAndTrack(
       ctx,
       "✅ Çykarmak talaby iberildi!\n" +
@@ -638,7 +643,6 @@ bot.on("message:text", async (ctx) => {
 
   if (state.menu === "order") {
     await sendAdminOrder(ctx, "El sargyt", "Belli däl", `Ulanyjy sargyt: ${text}`);
-    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
     await sendAndTrack(
       ctx,
       "✅ Sargyt kabul edildi!\n\n" +
@@ -651,7 +655,6 @@ bot.on("message:text", async (ctx) => {
 
   const lowerText = text.toLowerCase();
   if (lowerText.includes("salam") || lowerText.includes("hello")) {
-    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
     return await sendAndTrack(
       ctx,
       "👋 Salam! Kema Hyzmatlara hoş geldiňiz!\n\n" +
@@ -660,7 +663,6 @@ bot.on("message:text", async (ctx) => {
     );
   }
 
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   await sendAndTrack(
     ctx,
     "🤔 Düşünmedim.\n\n" +
@@ -672,3 +674,10 @@ bot.on("message:text", async (ctx) => {
 bot.start();
 console.log("✅ Kema Hyzmatlar BOT işleýär!");
 console.log(`📱 Admin: @${ADMIN_USERNAME}`);
+'''
+
+with open("/mnt/agents/output/bot.js", "w", encoding="utf-8") as f:
+    f.write(code)
+
+print("✅ bot.js ýazdy!")
+print(f"📏 Uzynlygy: {len(code)} harp")
