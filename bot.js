@@ -1,4 +1,4 @@
-import { Bot, InlineKeyboard } from "grammy";
+import { Bot, Keyboard } from "grammy";
 
 const bot = new Bot("8836556532:AAEggdrCWkRfskzg-sPg8T9Xhdey44LPy9s");
 const ADMIN_ID = "kemabest77";
@@ -22,43 +22,59 @@ const vpnTypes = [
   { name: "Outline", icon: "🔐" },
 ];
 
-const mainMenu = new InlineKeyboard()
-  .text("💎 UC satyn al", "uc_menu").row()
-  .text("🔒 VPN satyn al", "vpn_menu").row()
-  .text("🛒 Sargyt et", "order").row()
-  .text("👤 Sahsy otag", "personal").row()
-  .text("📞 Habarlas", "contact").row()
-  .text("💰 Bal topla", "balance").row()
-  .text("⬇️ Menyu", "menu");
+// ===== ASAKDAKI MENYULAR (Reply Keyboard) =====
 
-function ucMenu() {
-  const keyboard = new InlineKeyboard();
+function mainMenuKeyboard() {
+  return new Keyboard()
+    .text("💎 UC satyn al").text("🔒 VPN satyn al").row()
+    .text("🛒 Sargyt et").text("👤 Şahsy otag").row()
+    .text("📞 Habarlaş").text("💰 Bal topla").row()
+    .text("⬇️ Menýu")
+    .resized();
+}
+
+function ucMenuKeyboard() {
+  const keyboard = new Keyboard().resized();
   ucPrices.forEach((item, index) => {
-    keyboard.text(
-      `${item.uc} UC — ${item.tmt} TMT`,
-      `uc_${item.uc}_${item.tmt}`
-    );
+    keyboard.text(`💎 ${item.uc} UC — ${item.tmt} TMT`);
     if ((index + 1) % 2 === 0) keyboard.row();
   });
-  keyboard.row().text("⬇️ Yza", "back");
+  keyboard.row().text("⬇️ Yza");
   return keyboard;
 }
 
-function vpnMenu() {
-  const keyboard = new InlineKeyboard();
+function vpnMenuKeyboard() {
+  const keyboard = new Keyboard().resized();
   vpnTypes.forEach((type) => {
-    keyboard.text(`${type.icon} ${type.name}`, `vpn_${type.name}`).row();
+    keyboard.text(`${type.icon} ${type.name}`).row();
   });
-  keyboard.text("⬇️ Yza", "back");
+  keyboard.text("⬇️ Yza");
   return keyboard;
 }
 
-function vpnPaymentMenu(type) {
-  return new InlineKeyboard()
-    .text("📅 Aylyk — 80 TMT", `vpn_${type}_monthly`).row()
-    .text("📆 Hepde — 30 TMT", `vpn_${type}_weekly`).row()
-    .text("⬇️ Yza", "vpn_menu");
+function vpnPaymentKeyboard(type) {
+  return new Keyboard()
+    .text(`📅 ${type} — Aýlyk (80 TMT)`).row()
+    .text(`📆 ${type} — Hepde (30 TMT)`).row()
+    .text("⬇️ Yza")
+    .resized();
 }
+
+function orderMenuKeyboard() {
+  return new Keyboard()
+    .text("💎 UC sayla").text("🔒 VPN sayla").row()
+    .text("⬇️ Menýu")
+    .resized();
+}
+
+function personalMenuKeyboard() {
+  return new Keyboard()
+    .text("✏️ Parol üýtget").text("🔐 TMCELL parol").row()
+    .text("💰 Çykarmak").text("⬇️ Menýu").row()
+    .resized();
+}
+
+// ===== ADMINA HABAR BERMEK =====
 
 async function sendAdminOrder(ctx, product, price, details = "") {
   const user = ctx.from;
@@ -71,330 +87,364 @@ async function sendAdminOrder(ctx, product, price, details = "") {
   });
   
   const adminMessage = 
-    `📦 Taze sargyt!\n\n` +
-    `👤 Musteri: ${user.first_name || "Belli dal"}\n` +
+    `📦 Täze sargyt!\n\n` +
+    `👤 Müşderi: ${user.first_name || "Belli däl"}\n` +
     `🆔 ID: ${user.id}\n` +
-    `📱 Telefon: +993XXXXXXXX\n` +
-    `👤 Username: @${user.username || "Yok"}\n\n` +
+    `👤 Username: @${user.username || "Ýok"}\n\n` +
     `📦 Haryt: ${product}\n` +
-    `💰 Baha: ${price} TMT\n` +
+    `💰 Bahasy: ${price} TMT\n` +
     `${details ? `📝 Maglumat: ${details}\n` : ""}` +
     `⏰ Wagt: ${now}`;
   
   try {
     await bot.api.sendMessage(ADMIN_ID, adminMessage, { parse_mode: "Markdown" });
   } catch (e) {
-    console.log("Admin SMS yollanmady:", e.message);
+    console.log("Admina SMS ugradylmady:", e.message);
   }
 }
+
+// ===== START KOMANDASY =====
 
 bot.command("start", async (ctx) => {
   const user = ctx.from;
   await ctx.reply(
     "🎉 Kema Hyzmatlar\n\n" +
-    "Hos geldiniz! Neme satyn almak isleyarsiniz?\n\n" +
-    `👤 ID-niz: ${user.id}\n` +
-    `💰 Elyeter: 0.0 TMT\n` +
+    "Hoş geldiňiz! Näme satyn almak isleýärsiňiz?\n\n" +
+    `👤 ID-ňiz: ${user.id}\n` +
+    `💰 Elýeter: 0.0 TMT\n` +
     `🧊 Dondurulan: 0.0 TMT`,
     { 
       parse_mode: "Markdown",
-      reply_markup: mainMenu
+      reply_markup: mainMenuKeyboard()
     }
   );
 });
 
-bot.command("uc", async (ctx) => {
+// ===== UC MENYUSY =====
+
+bot.hears("💎 UC satyn al", async (ctx) => {
   let text = "💎 UC Bahalary:\n\n";
   ucPrices.forEach(item => {
     text += `• ${item.uc} UC — ${item.tmt} TMT\n`;
   });
-  text += "\n🛒 Sargyt etmek ucin UC saylan:";
+  text += "\n🛒 Sargyt etmek üçin UC saýlaň:";
   
   await ctx.reply(text, { 
     parse_mode: "Markdown",
-    reply_markup: ucMenu()
+    reply_markup: ucMenuKeyboard()
   });
 });
 
-bot.command("vpn", async (ctx) => {
+// UC bahalary basylanda
+ucPrices.forEach(item => {
+  bot.hears(`💎 ${item.uc} UC — ${item.tmt} TMT`, async (ctx) => {
+    await sendAdminOrder(ctx, `${item.uc} UC`, item.tmt, `UC sargyt: ${item.uc} UC`);
+    
+    await ctx.reply(
+      `✅ Sargyt kabul edildi!\n\n` +
+      `💎 ${item.uc} UC\n` +
+      `💰 ${item.tmt} TMT\n\n` +
+      `📩 Admina iberildi: @kemabest77\n\n` +
+      `📱 Admina ýazmak üçin aşakdaky düwme basyň:`,
+      { 
+        parse_mode: "Markdown",
+        reply_markup: new Keyboard()
+          .url("📱 Admina ýaz", "https://t.me/kemabest77").row()
+          .text("⬇️ Menýu")
+          .resized()
+      }
+    );
+  });
+});
+
+// ===== VPN MENYUSY =====
+
+bot.hears("🔒 VPN satyn al", async (ctx) => {
   await ctx.reply(
     "🔒 VPN Hyzmatlary:\n\n" +
-    "Hyzmat saylan:",
+    "Hyzmat saýlaň:",
     { 
       parse_mode: "Markdown",
-      reply_markup: vpnMenu()
+      reply_markup: vpnMenuKeyboard()
     }
   );
 });
 
-bot.on("callback_query:data", async (ctx) => {
-  const data = ctx.callbackQuery.data;
-  const user = ctx.from;
-  
-  switch(data) {
-    case "uc_menu":
-      let ucText = "💎 UC Bahalary:\n\n";
-      ucPrices.forEach(item => {
-        ucText += `• ${item.uc} UC — ${item.tmt} TMT\n`;
-      });
-      ucText += "\n🛒 Sargyt etmek ucin UC saylan:";
-      
-      await ctx.editMessageText(ucText, { 
+// VPN tipleri basylanda
+vpnTypes.forEach(type => {
+  bot.hears(`${type.icon} ${type.name}`, async (ctx) => {
+    await ctx.reply(
+      `${type.icon} ${type.name} VPN\n\n` +
+      `📅 Aýlyk — 80 TMT\n` +
+      `📆 Hepde — 30 TMT`,
+      { 
         parse_mode: "Markdown",
-        reply_markup: ucMenu()
-      });
-      break;
-      
-    case "vpn_menu":
-      await ctx.editMessageText(
-        "🔒 VPN Hyzmatlary:\n\n" +
-        "Hyzmat saylan:",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: vpnMenu()
-        }
-      );
-      break;
-      
-    case "order":
-      await ctx.editMessageText(
-        "🛒 Sargyt etmek\n\n" +
-        "Sargyt etmek ucin asakdaky maglumatlary iberin:\n\n" +
-        "1️⃣ Harydyn ady (UC / VPN)\n" +
-        "2️⃣ Mocberi\n" +
-        "3️⃣ Telefon belginiz",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: new InlineKeyboard()
-            .text("💎 UC sayla", "uc_menu").row()
-            .text("🔒 VPN sayla", "vpn_menu").row()
-            .text("⬇️ Menyu", "menu")
-        }
-      );
-      break;
-      
-    case "personal":
-      const refLink = `https://t.me/${ctx.me.username}?start=${user.id}`;
-      await ctx.editMessageText(
-        "👤 Sahsy otag\n\n" +
-        `🆔 ID-niz: ${user.id}\n` +
-        `👤 Adynyz: ${user.first_name || "Belli dal"}\n\n` +
-        "💰 Elyeter hasap: 0.0 TMT\n" +
-        "🧊 Dondurulan: 0.0 TMT\n" +
-        "🔒 Gorag parol: ✅\n" +
-        "📱 TMCELL parol: ❌\n\n" +
-        `👥 Referal ssylka:\n${refLink}\n\n` +
-        "Sizde 0 referal bar.\n" +
-        "Referal hasap: 0.0 TMT",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: new InlineKeyboard()
-            .text("✏️ Gorag parol uytgetmek", "change_pass").row()
-            .text("🔐 TMCELL parol duzmek", "tmcell_pass").row()
-            .text("💰 Referal hasapdan cykarmak", "withdraw_ref").row()
-            .text("⬇️ Menyu", "menu")
-        }
-      );
-      break;
-      
-    case "contact":
-      await ctx.editMessageText(
-        "📞 Habarlas\n\n" +
-        "📱 Telegram: @kemabest77\n" +
-        "📍 Asgabat saheri",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: new InlineKeyboard()
-            .url("📱 Admina yaz", "https://t.me/kemabest77")
-            .text("⬇️ Menyu", "menu")
-        }
-      );
-      break;
-      
-    case "balance":
-      await ctx.editMessageText(
-        "💰 Bal topla gazan\n\n" +
-        "🎁 Her sargyt ucin bal gazanyn!\n\n" +
-        "• 100 TMT sargyt — 5 bal\n" +
-        "• 500 TMT sargyt — 30 bal\n" +
-        "• 1000 TMT sargyt — 70 bal\n\n" +
-        "🏆 Bal ygnap, arzanlyklar gazanyn!",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: mainMenu
-        }
-      );
-      break;
-      
-    case "menu":
-    case "back":
-      await ctx.editMessageText(
-        "🎉 Kema Hyzmatlar\n\n" +
-        "Hos geldiniz! Neme satyn almak isleyarsiniz?\n\n" +
-        `👤 ID-niz: ${user.id}\n` +
-        `💰 Elyeter: 0.0 TMT\n` +
-        `🧊 Dondurulan: 0.0 TMT`,
-        { 
-          parse_mode: "Markdown",
-          reply_markup: mainMenu
-        }
-      );
-      break;
-      
-    case "vpn_Happ":
-      await ctx.editMessageText(
-        "📱 Happ VPN\n\n" +
-        "📅 Aylyk — 80 TMT\n" +
-        "📆 Hepde — 30 TMT",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: vpnPaymentMenu("Happ")
-        }
-      );
-      break;
-      
-    case "vpn_Shadowsocks":
-      await ctx.editMessageText(
-        "🌐 Shadowsocks VPN\n\n" +
-        "📅 Aylyk — 80 TMT\n" +
-        "📆 Hepde — 30 TMT",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: vpnPaymentMenu("Shadowsocks")
-        }
-      );
-      break;
-      
-    case "vpn_Outline":
-      await ctx.editMessageText(
-        "🔐 Outline VPN\n\n" +
-        "📅 Aylyk — 80 TMT\n" +
-        "📆 Hepde — 30 TMT",
-        { 
-          parse_mode: "Markdown",
-          reply_markup: vpnPaymentMenu("Outline")
-        }
-      );
-      break;
-      
-    default:
-      if (data.startsWith("uc_")) {
-        const parts = data.split("_");
-        const uc = parts[1];
-        const tmt = parts[2];
-        
-        await sendAdminOrder(ctx, `${uc} UC`, tmt, `UC sargyt: ${uc} UC`);
-        
-        await ctx.editMessageText(
-          `✅ Sargyt kabul edildi!\n\n` +
-          `💎 ${uc} UC\n` +
-          `💰 ${tmt} TMT\n\n` +
-          `📩 Admina iberildi: @kemabest77\n\n` +
-          `📱 Admina yazmak ucin asakdaky butona basin:`,
-          { 
-            parse_mode: "Markdown",
-            reply_markup: new InlineKeyboard()
-              .url("📱 Admina yaz", "https://t.me/kemabest77").row()
-              .text("⬇️ Menyu", "menu")
-          }
-        );
+        reply_markup: vpnPaymentKeyboard(type.name)
       }
-      else if (data.startsWith("vpn_") && data.includes("_monthly")) {
-        const type = data.split("_")[1];
-        
-        await sendAdminOrder(ctx, `${type} VPN`, "80", `VPN: ${type} (Aylyk)`);
-        
-        await ctx.editMessageText(
-          `✅ VPN Sargyt kabul edildi!\n\n` +
-          `🔒 ${type} VPN\n` +
-          `📅 Aylyk\n` +
-          `💰 80 TMT\n\n` +
-          `📩 Admina iberildi: @kemabest77\n\n` +
-          `📱 Admina yazmak ucin asakdaky butona basin:`,
-          { 
-            parse_mode: "Markdown",
-            reply_markup: new InlineKeyboard()
-              .url("📱 Admina yaz", "https://t.me/kemabest77").row()
-              .text("⬇️ Menyu", "menu")
-          }
-        );
-      }
-      else if (data.startsWith("vpn_") && data.includes("_weekly")) {
-        const type = data.split("_")[1];
-        
-        await sendAdminOrder(ctx, `${type} VPN`, "30", `VPN: ${type} (Hepde)`);
-        
-        await ctx.editMessageText(
-          `✅ VPN Sargyt kabul edildi!\n\n` +
-          `🔒 ${type} VPN\n` +
-          `📆 Hepde\n` +
-          `💰 30 TMT\n\n` +
-          `📩 Admina iberildi: @kemabest77\n\n` +
-          `📱 Admina yazmak ucin asakdaky butona basin:`,
-          { 
-            parse_mode: "Markdown",
-            reply_markup: new InlineKeyboard()
-              .url("📱 Admina yaz", "https://t.me/kemabest77").row()
-              .text("⬇️ Menyu", "menu")
-          }
-        );
-      }
-      else {
-        await ctx.answerCallbackQuery("Dusunmedim");
-      }
-  }
-  
-  await ctx.answerCallbackQuery();
+    );
+  });
 });
+
+// VPN tölegleri basylanda
+vpnTypes.forEach(type => {
+  // Aýlyk
+  bot.hears(`📅 ${type.name} — Aýlyk (80 TMT)`, async (ctx) => {
+    await sendAdminOrder(ctx, `${type.name} VPN`, "80", `VPN: ${type.name} (Aýlyk)`);
+    
+    await ctx.reply(
+      `✅ VPN Sargyt kabul edildi!\n\n` +
+      `🔒 ${type.name} VPN\n` +
+      `📅 Aýlyk\n` +
+      `💰 80 TMT\n\n` +
+      `📩 Admina iberildi: @kemabest77\n\n` +
+      `📱 Admina ýazmak üçin aşakdaky düwme basyň:`,
+      { 
+        parse_mode: "Markdown",
+        reply_markup: new Keyboard()
+          .url("📱 Admina ýaz", "https://t.me/kemabest77").row()
+          .text("⬇️ Menýu")
+          .resized()
+      }
+    );
+  });
+  
+  // Hepde
+  bot.hears(`📆 ${type.name} — Hepde (30 TMT)`, async (ctx) => {
+    await sendAdminOrder(ctx, `${type.name} VPN`, "30", `VPN: ${type.name} (Hepde)`);
+    
+    await ctx.reply(
+      `✅ VPN Sargyt kabul edildi!\n\n` +
+      `🔒 ${type.name} VPN\n` +
+      `📆 Hepde\n` +
+      `💰 30 TMT\n\n` +
+      `📩 Admina iberildi: @kemabest77\n\n` +
+      `📱 Admina ýazmak üçin aşakdaky düwme basyň:`,
+      { 
+        parse_mode: "Markdown",
+        reply_markup: new Keyboard()
+          .url("📱 Admina ýaz", "https://t.me/kemabest77").row()
+          .text("⬇️ Menýu")
+          .resized()
+      }
+    );
+  });
+});
+
+// ===== SARGYT ET =====
+
+bot.hears("🛒 Sargyt et", async (ctx) => {
+  await ctx.reply(
+    "🛒 Sargyt etmek\n\n" +
+    "Sargyt etmek üçin aşakdaky maglumatlary iberiň:\n\n" +
+    "1️⃣ Harydyň ady (UC / VPN)\n" +
+    "2️⃣ Möçberi\n" +
+    "3️⃣ Telefon belgiňiz",
+    { 
+      parse_mode: "Markdown",
+      reply_markup: orderMenuKeyboard()
+    }
+  );
+});
+
+bot.hears("💎 UC sayla", async (ctx) => {
+  let text = "💎 UC Bahalary:\n\n";
+  ucPrices.forEach(item => {
+    text += `• ${item.uc} UC — ${item.tmt} TMT\n`;
+  });
+  text += "\n🛒 Sargyt etmek üçin UC saýlaň:";
+  
+  await ctx.reply(text, { 
+    parse_mode: "Markdown",
+    reply_markup: ucMenuKeyboard()
+  });
+});
+
+bot.hears("🔒 VPN sayla", async (ctx) => {
+  await ctx.reply(
+    "🔒 VPN Hyzmatlary:\n\n" +
+    "Hyzmat saýlaň:",
+    { 
+      parse_mode: "Markdown",
+      reply_markup: vpnMenuKeyboard()
+    }
+  );
+});
+
+// ===== ŞAHSY OTAG =====
+
+bot.hears("👤 Şahsy otag", async (ctx) => {
+  const user = ctx.from;
+  const refLink = `https://t.me/${ctx.me.username}?start=${user.id}`;
+  
+  await ctx.reply(
+    "👤 Şahsy otag\n\n" +
+    `🆔 ID-ňiz: ${user.id}\n` +
+    `👤 Adyňyz: ${user.first_name || "Belli däl"}\n\n` +
+    "💰 Elýeter hasap: 0.0 TMT\n" +
+    "🧊 Dondurulan: 0.0 TMT\n" +
+    "🔒 Gorag parol: ✅\n" +
+    "📱 TMCELL parol: ❌\n\n" +
+    `👥 Referal ssylka:\n${refLink}\n\n` +
+    "Sizde 0 referal bar.\n" +
+    "Referal hasap: 0.0 TMT",
+    { 
+      parse_mode: "Markdown",
+      reply_markup: personalMenuKeyboard()
+    }
+  );
+});
+
+// ===== HABARLAŞ =====
+
+bot.hears("📞 Habarlaş", async (ctx) => {
+  await ctx.reply(
+    "📞 Habarlaş\n\n" +
+    "📱 Telegram: @kemabest77\n" +
+    "📍 Aşgabat şäheri",
+    { 
+      parse_mode: "Markdown",
+      reply_markup: new Keyboard()
+        .url("📱 Admina ýaz", "https://t.me/kemabest77").row()
+        .text("⬇️ Menýu")
+        .resized()
+    }
+  );
+});
+
+// ===== BAL TOPLA =====
+
+bot.hears("💰 Bal topla", async (ctx) => {
+  await ctx.reply(
+    "💰 Bal topla / Gazan\n\n" +
+    "🎁 Her sargyt üçin bal gazanyň!\n\n" +
+    "• 100 TMT sargyt — 5 bal\n" +
+    "• 500 TMT sargyt — 30 bal\n" +
+    "• 1000 TMT sargyt — 70 bal\n\n" +
+    "🏆 Bal ýygnap, arzanlyklar gazanyň!",
+    { 
+      parse_mode: "Markdown",
+      reply_markup: mainMenuKeyboard()
+    }
+  );
+});
+
+// ===== MENÝU WE YZA =====
+
+bot.hears("⬇️ Menýu", async (ctx) => {
+  const user = ctx.from;
+  await ctx.reply(
+    "🎉 Kema Hyzmatlar\n\n" +
+    "Hoş geldiňiz! Näme satyn almak isleýärsiňiz?\n\n" +
+    `👤 ID-ňiz: ${user.id}\n` +
+    `💰 Elýeter: 0.0 TMT\n` +
+    `🧊 Dondurulan: 0.0 TMT`,
+    { 
+      parse_mode: "Markdown",
+      reply_markup: mainMenuKeyboard()
+    }
+  );
+});
+
+bot.hears("⬇️ Yza", async (ctx) => {
+  const user = ctx.from;
+  await ctx.reply(
+    "🎉 Kema Hyzmatlar\n\n" +
+    "Hoş geldiňiz! Näme satyn almak isleýärsiňiz?\n\n" +
+    `👤 ID-ňiz: ${user.id}\n` +
+    `💰 Elýeter: 0.0 TMT\n` +
+    `🧊 Dondurulan: 0.0 TMT`,
+    { 
+      parse_mode: "Markdown",
+      reply_markup: mainMenuKeyboard()
+    }
+  );
+});
+
+// ===== ADYNA ÝAZMAK (URL düwmesi üçin) =====
+
+bot.hears("📱 Admina ýaz", async (ctx) => {
+  await ctx.reply(
+    "📱 Admina ýazmak üçin:\n@kemabest77",
+    { 
+      parse_mode: "Markdown",
+      reply_markup: mainMenuKeyboard()
+    }
+  );
+});
+
+// ===== ADYNA ÝAZ (URL düwmesi basylanda) =====
+
+bot.hears("📱 Admina ýaz", async (ctx) => {
+  await ctx.reply(
+    "📱 Admin bilen habarlaşmak üçin:\n@kemabest77",
+    { 
+      reply_markup: mainMenuKeyboard()
+    }
+  );
+});
+
+// ===== ADYNA ÝAZ (URL düwme) - täzeden =====
+
+bot.hears("📱 Admina ýaz", async (ctx) => {
+  await ctx.reply(
+    "📱 Admin bilen habarlaşmak üçin @kemabest77 ýazaýyň.",
+    { reply_markup: mainMenuKeyboard() }
+  );
+});
+
+// ===== TÄZE ÜSTÜNE GOŞULAN DÜWMELER =====
+
+bot.hears("✏️ Parol üýtget", async (ctx) => {
+  await ctx.reply(
+    "✏️ Gorag paroly üýtgetmek\n\n" +
+    "Täze paroly ýazyň:",
+    { reply_markup: new Keyboard().text("⬇️ Yza").resized() }
+  );
+});
+
+bot.hears("🔐 TMCELL parol", async (ctx) => {
+  await ctx.reply(
+    "🔐 TMCELL parol düzmek\n\n" +
+    "TMCELL parolyňyzy ýazyň:",
+    { reply_markup: new Keyboard().text("⬇️ Yza").resized() }
+  );
+});
+
+bot.hears("💰 Çykarmak", async (ctx) => {
+  await ctx.reply(
+    "💰 Referal hasapdan çykarmak\n\n" +
+    "Çykarmak isleýän mukdary ýazyň:",
+    { reply_markup: new Keyboard().text("⬇️ Yza").resized() }
+  );
+});
+
+// ===== TEKST HABARLAR (düşünmedim) =====
 
 bot.on("message:text", async (ctx) => {
   const text = ctx.message.text.toLowerCase();
   
-  if (text.includes("uc") || text.includes("pubg")) {
-    let ucText = "💎 UC Bahalary:\n\n";
-    ucPrices.forEach(item => {
-      ucText += `• ${item.uc} UC — ${item.tmt} TMT\n`;
-    });
-    return await ctx.reply(ucText, { 
-      parse_mode: "Markdown",
-      reply_markup: ucMenu()
-    });
-  }
-  
-  if (text.includes("vpn") || text.includes("internet")) {
-    return await ctx.reply(
-      "🔒 VPN Hyzmatlary:\n\n" +
-      "📱 Happ\n" +
-      "🌐 Shadowsocks\n" +
-      "🔐 Outline\n\n" +
-      "📅 Aylyk — 80 TMT\n" +
-      "📆 Hepde — 30 TMT",
-      { 
-        parse_mode: "Markdown",
-        reply_markup: vpnMenu()
-      }
-    );
-  }
-  
   if (text.includes("salam") || text.includes("hello")) {
     return await ctx.reply(
-      "👋 Salam! Kema Hyzmatlara hos geldiniz!\n\n" +
-      "Neme satyn almak isleyarsiniz?",
+      "👋 Salam! Kema Hyzmatlara hoş geldiňiz!\n\n" +
+      "Näme satyn almak isleýärsiňiz?",
       { 
         parse_mode: "Markdown",
-        reply_markup: mainMenu
+        reply_markup: mainMenuKeyboard()
       }
     );
   }
   
+  // Başga tekstler üçin menýu görkez
   await ctx.reply(
-    "🤔 Dusunmedim.\n\n" +
-    "📋 /start basyp, komandary gorup bilersiniz.",
-    { reply_markup: mainMenu }
+    "🤔 Düşünmedim.\n\n" +
+    "📋 /start basyp, komandany görüp bilersiňiz.",
+    { reply_markup: mainMenuKeyboard() }
   );
 });
 
+// ===== BOTY BAŞLATMAK =====
+
 bot.start();
-console.log("✅ Kema Hyzmatlar BOT isleyar!");
+console.log("✅ Kema Hyzmatlar BOT işleýär!");
 console.log(`📱 Admin: @kemabest77`);
-      
+    
