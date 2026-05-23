@@ -150,17 +150,11 @@ bot.hears("💎 UC satyn al", async (ctx) => {
 bot.hears("💰 Nagt", async (ctx) => {
   await ctx.reply("⏳", { reply_markup: removeKeyboard() });
   
-  let text = "💎 UC Bahalary:\n\n";
-  ucPrices.forEach(item => {
-    text += `• ${item.uc} UC — ${item.tmt} TMT\n`;
-  });
-  text += "\n🛒 Sargyt etmek üçin UC saýlaň:";
-  
-  await ctx.reply(text, { 
-    parse_mode: "Markdown",
+  await ctx.reply("🛒 Sargyt etmek üçin UC saýlaň:", { 
     reply_markup: ucMenuKeyboard()
   });
 });
+
 
 bot.hears("📞 Telefona", async (ctx) => {
   await ctx.reply("⏳", { reply_markup: removeKeyboard() });
