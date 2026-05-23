@@ -1,5 +1,4 @@
-
-code = '''import { Bot, Keyboard, InlineKeyboard } from "grammy";
+import { Bot, Keyboard, InlineKeyboard } from "grammy";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -588,7 +587,7 @@ bot.on("message:text", async (ctx) => {
   }
 
   if (state.menu === "password_change" && state.step === "waiting") {
-    if (text.length >= 4 && text.length <= 8 && /^\\d+$/.test(text)) {
+    if (text.length >= 4 && text.length <= 8 && /^\d+$/.test(text)) {
       userPasswords.set(ctx.from.id, text);
       await sendAndTrack(
         ctx,
@@ -674,10 +673,3 @@ bot.on("message:text", async (ctx) => {
 bot.start();
 console.log("✅ Kema Hyzmatlar BOT işleýär!");
 console.log(`📱 Admin: @${ADMIN_USERNAME}`);
-'''
-
-with open("/mnt/agents/output/bot.js", "w", encoding="utf-8") as f:
-    f.write(code)
-
-print("✅ bot.js ýazdy!")
-print(f"📏 Uzynlygy: {len(code)} harp")
