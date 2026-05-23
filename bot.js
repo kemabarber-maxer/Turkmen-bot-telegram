@@ -1,7 +1,11 @@
-import { Bot, Keyboard } from "grammy";
+
+code = '''import { Bot, Keyboard } from "grammy";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const bot = new Bot("8836556532:AAEggdrCWkRfskzg-sPg8T9Xhdey44LPy9s");
-const ADMIN_ID = "kemabest77";
+const ADMIN_ID = 8375820047; // San ID (mysal: "123456789")
 
 const ucPrices = [
   { uc: 60, tmt: 23 },
@@ -21,6 +25,22 @@ const vpnTypes = [
   { name: "Shadowsocks", icon: "🌐" },
   { name: "Outline", icon: "🔐" },
 ];
+
+// ===== ULANYJY MAGLUMATLARY (WAGTLAPÇA MEMORY) =====
+const userStates = new Map();
+const userPasswords = new Map();
+const userTmcell = new Map();
+
+function getUserState(userId) {
+  if (!userStates.has(userId)) {
+    userStates.set(userId, { menu: "main" });
+  }
+  return userStates.get(userId);
+}
+
+function setUserState(userId, state) {
+  userStates.set(userId, state);
+}
 
 // ===== KÖNE MENÝUNY AÝYRMAK =====
 function removeKeyboard() {
@@ -84,6 +104,15 @@ function personalMenuKeyboard() {
     .resized();
 }
 
+// ===== TÖLEG GÖRNÜŞI MENYUSY =====
+function paymentTypeKeyboard() {
+  return new Keyboard()
+    .text("💰 Nagt").row()
+    .text("📞 Telefona").row()
+    .text("⬇️ Yza")
+    .resized();
+}
+
 // ===== ADMINA HABAR BERMEK =====
 async function sendAdminOrder(ctx, product, price, details = "") {
   const user = ctx.from;
@@ -92,395 +121,556 @@ async function sendAdminOrder(ctx, product, price, details = "") {
     hour: "2-digit",
     minute: "2-digit",
     day: "numeric",
-    month: "short"
+    month: "short",
+    year: "numeric",
   });
-  
-  const adminMessage = 
-    `📦 Täze sargyt!\n\n` +
-    `👤 Müşderi: ${user.first_name || "Belli däl"}\n` +
-    `🆔 ID: ${user.id}\n` +
-    `👤 Username: @${user.username || "Ýok"}\n\n` +
-    `📦 Haryt: ${product}\n` +
-    `💰 Bahasy: ${price} TMT\n` +
-    `${details ? `📝 Maglumat: ${details}\n` : ""}` +
-    `⏰ Wagt: ${now}`;
-  
+
+  const adminMessage =
+    `📦 *Täze sargyt!*\\n\\n` +
+    `👤 *Müşderi:* ${user.first_name || "Belli däl"}\\n` +
+    `🆔 *ID:* ${user.id}\\n` +
+    `👤 *Username:* @${user.username || "Ýok"}\\n\\n` +
+    `📦 *Haryt:* ${product}\\n` +
+    `💰 *Bahasy:* ${price} TMT\\n` +
+    `${details ? `📝 *Maglumat:* ${details}\\n` : ""}` +
+    `⏰ *Wagt:* ${now}`;
+
   try {
-    await bot.api.sendMessage(ADMIN_ID, adminMessage, { parse_mode: "Markdown" });
+    await bot.api.sendMessage(ADMIN_ID, adminMessage, { parse_mode: "MarkdownV2" });
+    return true;
   } catch (e) {
-    console.log("Admina SMS ugradylmady:", e.message);
+    console.error("Admina SMS ugradylmady:", e.message);
+    await ctx.reply(
+      "⚠️ Sargyt kabul edildi, ýöne admina habar bermekde kynçylyk çykdy.\\n" +
+      "📱 Haýyş, özüňiz @kemabest77 bilen habarlaşyň."
+    );
+    return false;
   }
+}
+
+// ===== ESASY MENÝU JOGAPY =====
+async function sendMainMenu(ctx) {
+  const user = ctx.from;
+  await ctx.reply(
+    "🎉 *Kema Hyzmatlar*\\n\\n" +
+    "Hoş geldiňiz! Näme satyn almak isleýärsiňiz?\\n\\n" +
+    `👤 ID-ňiz: ${user.id}`,
+    {
+      parse_mode: "Markdown",
+      reply_markup: mainMenuKeyboard(),
+    }
+  );
 }
 
 // ===== START KOMANDASY =====
 bot.command("start", async (ctx) => {
-  const user = ctx.from;
-  await ctx.reply(
-    "🎉 Kema Hyzmatlar\n\n" +
-    "Hoş geldiňiz! Näme satyn almak isleýärsiňiz?\n\n" +
-    `👤 ID-ňiz: ${user.id}\n` +
-    `💰 Elýeter: 0.0 TMT\n` +
-    `🧊 Dondurulan: 0.0 TMT`,
-    { 
-      parse_mode: "Markdown",
-      reply_markup: mainMenuKeyboard()
-    }
-  );
+  setUserState(ctx.from.id, { menu: "main" });
+  await sendMainMenu(ctx);
 });
 
 // ===== UC SATYN AL =====
 bot.hears("💎 UC satyn al", async (ctx) => {
-  // Köne menýuny aýyr
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
-  let text = "🤔 Haýsy görnüş bilen tölegi geçirmek isleýärsiňiz?\n\n" +
-    "💰 Nagt\n" +
-    "📞 Telefona";
-  
-  await ctx.reply(text, { 
-    parse_mode: "Markdown",
-    reply_markup: new Keyboard()
-      .text("💰 Nagt").row()
-      .text("📞 Telefona").row()
-      .text("⬇️ Yza")
-      .resized()
-  });
+  setUserState(ctx.from.id, { menu: "uc_payment_type" });
+
+  await ctx.reply(
+    "🤔 Haýsy görnüş bilen tölegi geçirmek isleýärsiňiz?\\n\\n" +
+    "💰 Nagat\\n" +
+    "📞 Telefona",
+    {
+      parse_mode: "Markdown",
+      reply_markup: paymentTypeKeyboard(),
+    }
+  );
 });
 
 bot.hears("💰 Nagt", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
-  let text = "💎 UC Bahalary:\n\n";
-  ucPrices.forEach(item => {
-    text += `• ${item.uc} UC — ${item.tmt} TMT\n`;
+  const state = getUserState(ctx.from.id);
+  if (state.menu !== "uc_payment_type") return;
+
+  setUserState(ctx.from.id, { menu: "uc_list", paymentType: "nagt" });
+
+  let text = "💎 *UC Bahalary:*\\n\\n";
+  ucPrices.forEach((item) => {
+    text += `• ${item.uc} UC — ${item.tmt} TMT\\n`;
   });
-  text += "\n🛒 Sargyt etmek üçin UC saýlaň:";
-  
-  await ctx.reply(text, { 
+  text += "\\n🛒 Sargyt etmek üçin UC saýlaň:";
+
+  await ctx.reply(text, {
     parse_mode: "Markdown",
-    reply_markup: ucMenuKeyboard()
+    reply_markup: ucMenuKeyboard(),
   });
 });
 
 bot.hears("📞 Telefona", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
-  let text = "💎 UC Bahalary:\n\n";
-  ucPrices.forEach(item => {
-    text += `• ${item.uc} UC — ${item.tmt} TMT\n`;
+  const state = getUserState(ctx.from.id);
+  if (state.menu !== "uc_payment_type") return;
+
+  setUserState(ctx.from.id, { menu: "uc_list", paymentType: "telefon" });
+
+  let text = "💎 *UC Bahalary:*\\n\\n";
+  ucPrices.forEach((item) => {
+    text += `• ${item.uc} UC — ${item.tmt} TMT\\n`;
   });
-  text += "\n🛒 Sargyt etmek üçin UC saýlaň:";
-  
-  await ctx.reply(text, { 
+  text += "\\n🛒 Sargyt etmek üçin UC saýlaň:";
+
+  await ctx.reply(text, {
     parse_mode: "Markdown",
-    reply_markup: ucMenuKeyboard()
+    reply_markup: ucMenuKeyboard(),
   });
 });
 
 // UC bahalary basylanda
-ucPrices.forEach(item => {
+ucPrices.forEach((item) => {
   bot.hears(`${item.uc} UC — ${item.tmt} TMT`, async (ctx) => {
-    await sendAdminOrder(ctx, `${item.uc} UC`, item.tmt, `UC sargyt: ${item.uc} UC`);
-    
-    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-    
-    await ctx.reply(
-      `✅ Sargyt kabul edildi!\n\n` +
-      `💎 ${item.uc} UC\n` +
-      `💰 ${item.tmt} TMT\n\n` +
-      `📩 Admina iberildi: @kemabest77\n\n` +
-      `📱 Admina ýazmak üçin aşakdaky düwme basyň:`,
-      { 
-        parse_mode: "Markdown",
-        reply_markup: new Keyboard()
-          .text("📱 Admina ýaz").row()
-          .text("⬇️ Yza")
-          .resized()
-      }
+    const state = getUserState(ctx.from.id);
+    if (state.menu !== "uc_list") return;
+
+    const paymentType = state.paymentType === "telefon" ? "Telefona" : "Nagt";
+    const sent = await sendAdminOrder(
+      ctx,
+      `${item.uc} UC`,
+      item.tmt,
+      `UC sargyt: ${item.uc} UC | Töleg: ${paymentType}`
     );
+
+    if (sent) {
+      await ctx.reply(
+        `✅ *Sargyt kabul edildi!*\\n\\n` +
+        `💎 ${item.uc} UC\\n` +
+        `💰 ${item.tmt} TMT\\n` +
+        `💳 Töleg görnüşi: ${paymentType}\\n\\n` +
+        `📩 Admina iberildi\\n\\n` +
+        `📱 Admina ýazmak üçin aşakdaky düwme basyň:`,
+        {
+          parse_mode: "Markdown",
+          reply_markup: new Keyboard()
+            .text("📱 Admina ýaz").row()
+            .text("⬇️ Yza")
+            .resized(),
+        }
+      );
+    }
+    setUserState(ctx.from.id, { menu: "uc_order_done" });
   });
 });
 
 // ===== VPN SATYN AL =====
 bot.hears("🔒 VPN satyn al", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
+  setUserState(ctx.from.id, { menu: "vpn_list" });
+
   await ctx.reply(
-    "🔒 VPN Hyzmatlary:\n\n" +
-    "Hyzmat saýlaň:",
-    { 
+    "🔒 *VPN Hyzmatlary:*\\n\\n" + "Hyzmat saýlaň:",
+    {
       parse_mode: "Markdown",
-      reply_markup: vpnMenuKeyboard()
+      reply_markup: vpnMenuKeyboard(),
     }
   );
 });
 
 // VPN tipleri basylanda
-vpnTypes.forEach(type => {
+vpnTypes.forEach((type) => {
   bot.hears(`${type.icon} ${type.name}`, async (ctx) => {
-    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-    
+    const state = getUserState(ctx.from.id);
+    if (state.menu !== "vpn_list") return;
+
+    setUserState(ctx.from.id, { menu: "vpn_payment", vpnType: type.name });
+
     await ctx.reply(
-      `${type.icon} ${type.name} VPN\n\n` +
-      `📅 Aýlyk — 80 TMT\n` +
+      `${type.icon} *${type.name} VPN*\\n\\n` +
+      `📅 Aýlyk — 80 TMT\\n` +
       `📆 Hepde — 30 TMT`,
-      { 
+      {
         parse_mode: "Markdown",
-        reply_markup: vpnPaymentKeyboard(type.name)
+        reply_markup: vpnPaymentKeyboard(type.name),
       }
     );
   });
 });
 
 // VPN tölegleri basylanda
-vpnTypes.forEach(type => {
+vpnTypes.forEach((type) => {
   bot.hears(`📅 ${type.name} — Aýlyk (80 TMT)`, async (ctx) => {
-    await sendAdminOrder(ctx, `${type.name} VPN`, "80", `VPN: ${type.name} (Aýlyk)`);
-    
-    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-    
-    await ctx.reply(
-      `✅ VPN Sargyt kabul edildi!\n\n` +
-      `🔒 ${type.name} VPN\n` +
-      `📅 Aýlyk\n` +
-      `💰 80 TMT\n\n` +
-      `📩 Admina iberildi: @kemabest77\n\n` +
-      `📱 Admina ýazmak üçin aşakdaky düwme basyň:`,
-      { 
-        parse_mode: "Markdown",
-        reply_markup: new Keyboard()
-          .text("📱 Admina ýaz").row()
-          .text("⬇️ Yza")
-          .resized()
-      }
+    const state = getUserState(ctx.from.id);
+    if (state.menu !== "vpn_payment" || state.vpnType !== type.name) return;
+
+    const sent = await sendAdminOrder(
+      ctx,
+      `${type.name} VPN`,
+      "80",
+      `VPN: ${type.name} (Aýlyk)`
     );
+
+    if (sent) {
+      await ctx.reply(
+        `✅ *VPN Sargyt kabul edildi!*\\n\\n` +
+        `🔒 ${type.name} VPN\\n` +
+        `📅 Aýlyk\\n` +
+        `💰 80 TMT\\n\\n` +
+        `📩 Admina iberildi\\n\\n` +
+        `📱 Admina ýazmak üçin aşakdaky düwme basyň:`,
+        {
+          parse_mode: "Markdown",
+          reply_markup: new Keyboard()
+            .text("📱 Admina ýaz").row()
+            .text("⬇️ Yza")
+            .resized(),
+        }
+      );
+    }
+    setUserState(ctx.from.id, { menu: "vpn_order_done" });
   });
-  
+
   bot.hears(`📆 ${type.name} — Hepde (30 TMT)`, async (ctx) => {
-    await sendAdminOrder(ctx, `${type.name} VPN`, "30", `VPN: ${type.name} (Hepde)`);
-    
-    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-    
-    await ctx.reply(
-      `✅ VPN Sargyt kabul edildi!\n\n` +
-      `🔒 ${type.name} VPN\n` +
-      `📆 Hepde\n` +
-      `💰 30 TMT\n\n` +
-      `📩 Admina iberildi: @kemabest77\n\n` +
-      `📱 Admina ýazmak üçin aşakdaky düwme basyň:`,
-      { 
-        parse_mode: "Markdown",
-        reply_markup: new Keyboard()
-          .text("📱 Admina ýaz").row()
-          .text("⬇️ Yza")
-          .resized()
-      }
+    const state = getUserState(ctx.from.id);
+    if (state.menu !== "vpn_payment" || state.vpnType !== type.name) return;
+
+    const sent = await sendAdminOrder(
+      ctx,
+      `${type.name} VPN`,
+      "30",
+      `VPN: ${type.name} (Hepde)`
     );
+
+    if (sent) {
+      await ctx.reply(
+        `✅ *VPN Sargyt kabul edildi!*\\n\\n` +
+        `🔒 ${type.name} VPN\\n` +
+        `📆 Hepde\\n` +
+        `💰 30 TMT\\n\\n` +
+        `📩 Admina iberildi\\n\\n` +
+        `📱 Admina ýazmak üçin aşakdaky düwme basyň:`,
+        {
+          parse_mode: "Markdown",
+          reply_markup: new Keyboard()
+            .text("📱 Admina ýaz").row()
+            .text("⬇️ Yza")
+            .resized(),
+        }
+      );
+    }
+    setUserState(ctx.from.id, { menu: "vpn_order_done" });
   });
 });
 
 // ===== SARGYT ET =====
 bot.hears("🛒 Sargyt et", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
+  setUserState(ctx.from.id, { menu: "order" });
+
   await ctx.reply(
-    "🛒 Sargyt etmek\n\n" +
-    "Sargyt etmek üçin aşakdaky maglumatlary iberiň:\n\n" +
-    "1️⃣ Harydyň ady (UC / VPN)\n" +
-    "2️⃣ Möçberi\n" +
+    "🛒 *Sargyt etmek*\\n\\n" +
+    "Sargyt etmek üçin aşakdaky maglumatlary iberiň:\\n\\n" +
+    "1️⃣ Harydyň ady (UC / VPN)\\n" +
+    "2️⃣ Möçberi\\n" +
     "3️⃣ Telefon belgiňiz",
-    { 
+    {
       parse_mode: "Markdown",
-      reply_markup: orderMenuKeyboard()
+      reply_markup: orderMenuKeyboard(),
     }
   );
 });
 
 bot.hears("💎 UC sayla", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
-  let text = "🤔 Haýsy görnüş bilen tölegi geçirmek isleýärsiňiz?\n\n" +
-    "💰 Nagt\n" +
-    "📞 Telefona";
-  
-  await ctx.reply(text, { 
-    parse_mode: "Markdown",
-    reply_markup: new Keyboard()
-      .text("💰 Nagt").row()
-      .text("📞 Telefona").row()
-      .text("⬇️ Yza")
-      .resized()
-  });
+  const state = getUserState(ctx.from.id);
+  if (state.menu !== "order") return;
+
+  setUserState(ctx.from.id, { menu: "uc_payment_type" });
+
+  await ctx.reply(
+    "🤔 Haýsy görnüş bilen tölegi geçirmek isleýärsiňiz?\\n\\n" +
+    "💰 Nagt\\n" +
+    "📞 Telefona",
+    {
+      parse_mode: "Markdown",
+      reply_markup: paymentTypeKeyboard(),
+    }
+  );
 });
 
 bot.hears("🔒 VPN sayla", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
+  const state = getUserState(ctx.from.id);
+  if (state.menu !== "order") return;
+
+  setUserState(ctx.from.id, { menu: "vpn_list" });
+
   await ctx.reply(
-    "🔒 VPN Hyzmatlary:\n\n" +
-    "Hyzmat saýlaň:",
-    { 
+    "🔒 *VPN Hyzmatlary:*\\n\\n" + "Hyzmat saýlaň:",
+    {
       parse_mode: "Markdown",
-      reply_markup: vpnMenuKeyboard()
+      reply_markup: vpnMenuKeyboard(),
     }
   );
 });
 
 // ===== ŞAHSY OTAG =====
 bot.hears("👤 Şahsy otag", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
+  setUserState(ctx.from.id, { menu: "personal" });
+
   const user = ctx.from;
   const refLink = `https://t.me/${ctx.me.username}?start=${user.id}`;
-  
+  const hasPassword = userPasswords.has(user.id) ? "✅" : "❌";
+  const hasTmcell = userTmcell.has(user.id) ? "✅" : "❌";
+
   await ctx.reply(
-    "👤 Şahsy otag\n\n" +
-    `🆔 ID-ňiz: ${user.id}\n` +
-    `👤 Adyňyz: ${user.first_name || "Belli däl"}\n\n` +
-    "💰 Elýeter hasap: 0.0 TMT\n" +
-    "🧊 Dondurulan: 0.0 TMT\n" +
-    "🔒 Gorag parol: ✅\n" +
-    "📱 TMCELL parol: ❌\n\n" +
-    `👥 Referal ssylka:\n${refLink}\n\n` +
-    "Sizde 0 referal bar.\n" +
-    "Referal hasap: 0.0 TMT",
-    { 
+    "👤 *Şahsy otag*\\n\\n" +
+    `🆔 ID-ňiz: ${user.id}\\n` +
+    `👤 Adyňyz: ${user.first_name || "Belli däl"}\\n\\n` +
+    `🔒 Gorag parol: ${hasPassword}\\n` +
+    `📱 TMCELL parol: ${hasTmcell}\\n\\n` +
+    `👥 Referal ssylka:\\n${refLink}\\n\\n` +
+    "Sizde 0 referal bar.",
+    {
       parse_mode: "Markdown",
-      reply_markup: personalMenuKeyboard()
+      reply_markup: personalMenuKeyboard(),
     }
   );
 });
 
 // ===== HABARLAŞ =====
 bot.hears("📞 Habarlaş", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
+  setUserState(ctx.from.id, { menu: "contact" });
+
   await ctx.reply(
-    "📞 Habarlaş\n\n" +
-    "📱 Telegram: @kemabest77\n" +
+    "📞 *Habarlaş*\\n\\n" +
+    "📱 Telegram: @kemabest77\\n" +
     "📍 Aşgabat şäheri",
-    { 
+    {
       parse_mode: "Markdown",
       reply_markup: new Keyboard()
         .text("📱 Admina ýaz").row()
         .text("⬇️ Yza")
-        .resized()
+        .resized(),
     }
   );
 });
 
 // ===== BAL TOPLA =====
 bot.hears("💰 Bal topla", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
+  setUserState(ctx.from.id, { menu: "balance" });
+
   await ctx.reply(
-    "💰 Bal topla / Gazan\n\n" +
-    "🎁 Her sargyt üçin bal gazanyň!\n\n" +
-    "• 100 TMT sargyt — 5 bal\n" +
-    "• 500 TMT sargyt — 30 bal\n" +
-    "• 1000 TMT sargyt — 70 bal\n\n" +
+    "💰 *Bal topla / Gazan*\\n\\n" +
+    "🎁 Her sargyt üçin bal gazanyň!\\n\\n" +
+    "• 100 TMT sargyt — 5 bal\\n" +
+    "• 500 TMT sargyt — 30 bal\\n" +
+    "• 1000 TMT sargyt — 70 bal\\n\\n" +
     "🏆 Bal ýygnap, arzanlyklar gazanyň!",
-    { 
+    {
       parse_mode: "Markdown",
-      reply_markup: mainMenuKeyboard()
+      reply_markup: new Keyboard()
+        .text("⬇️ Yza")
+        .resized(),
     }
   );
 });
 
 // ===== ESASY MENÝU =====
 bot.hears("⬇️ Esasy menýu", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
-  const user = ctx.from;
-  await ctx.reply(
-    "🎉 Kema Hyzmatlar\n\n" +
-    "Hoş geldiňiz! Näme satyn almak isleýärsiňiz?\n\n" +
-    `👤 ID-ňiz: ${user.id}\n` +
-    `💰 Elýeter: 0.0 TMT\n` +
-    `🧊 Dondurulan: 0.0 TMT`,
-    { 
-      parse_mode: "Markdown",
-      reply_markup: mainMenuKeyboard()
-    }
-  );
+  setUserState(ctx.from.id, { menu: "main" });
+  await sendMainMenu(ctx);
 });
 
-// ===== YZA =====
+// ===== YZA (Yzygiderli) =====
 bot.hears("⬇️ Yza", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
-  const user = ctx.from;
-  await ctx.reply(
-    "🎉 Kema Hyzmatlar\n\n" +
-    "Hoş geldiňiz! Näme satyn almak isleýärsiňiz?\n\n" +
-    `👤 ID-ňiz: ${user.id}\n` +
-    `💰 Elýeter: 0.0 TMT\n` +
-    `🧊 Dondurulan: 0.0 TMT`,
-    { 
-      parse_mode: "Markdown",
-      reply_markup: mainMenuKeyboard()
-    }
-  );
+  const state = getUserState(ctx.from.id);
+
+  switch (state.menu) {
+    case "uc_list":
+    case "uc_order_done":
+      setUserState(ctx.from.id, { menu: "uc_payment_type" });
+      await ctx.reply(
+        "🤔 Haýsy görnüş bilen tölegi geçirmek isleýärsiňiz?\\n\\n" +
+        "💰 Nagt\\n" +
+        "📞 Telefona",
+        {
+          parse_mode: "Markdown",
+          reply_markup: paymentTypeKeyboard(),
+        }
+      );
+      break;
+
+    case "uc_payment_type":
+      setUserState(ctx.from.id, { menu: "main" });
+      await sendMainMenu(ctx);
+      break;
+
+    case "vpn_payment":
+    case "vpn_order_done":
+      setUserState(ctx.from.id, { menu: "vpn_list" });
+      await ctx.reply(
+        "🔒 *VPN Hyzmatlary:*\\n\\n" + "Hyzmat saýlaň:",
+        {
+          parse_mode: "Markdown",
+          reply_markup: vpnMenuKeyboard(),
+        }
+      );
+      break;
+
+    case "vpn_list":
+      setUserState(ctx.from.id, { menu: "main" });
+      await sendMainMenu(ctx);
+      break;
+
+    case "order":
+      setUserState(ctx.from.id, { menu: "main" });
+      await sendMainMenu(ctx);
+      break;
+
+    case "personal":
+    case "password_change":
+    case "tmcell_set":
+    case "withdraw":
+      setUserState(ctx.from.id, { menu: "main" });
+      await sendMainMenu(ctx);
+      break;
+
+    case "contact":
+      setUserState(ctx.from.id, { menu: "main" });
+      await sendMainMenu(ctx);
+      break;
+
+    case "balance":
+      setUserState(ctx.from.id, { menu: "main" });
+      await sendMainMenu(ctx);
+      break;
+
+    default:
+      setUserState(ctx.from.id, { menu: "main" });
+      await sendMainMenu(ctx);
+  }
 });
 
 // ===== ADYNA ÝAZMAK =====
 bot.hears("📱 Admina ýaz", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
   await ctx.reply(
     "📱 Admin bilen habarlaşmak üçin @kemabest77 ýazaýyň.",
     { reply_markup: mainMenuKeyboard() }
   );
+  setUserState(ctx.from.id, { menu: "main" });
 });
 
 // ===== ŞAHSY OTAG DÜWMELERI =====
 bot.hears("✏️ Parol üýtget", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
+  setUserState(ctx.from.id, { menu: "password_change", step: "waiting" });
+
   await ctx.reply(
-    "✏️ Gorag paroly üýtgetmek\n\n" +
-    "Täze paroly ýazyň:",
-    { reply_markup: new Keyboard().text("⬇️ Yza").resized() }
+    "✏️ *Gorag paroly üýtgetmek*\\n\\n" +
+    "Täze paroly ýazyň (4-8 san):",
+    {
+      parse_mode: "Markdown",
+      reply_markup: new Keyboard().text("⬇️ Yza").resized(),
+    }
   );
 });
 
 bot.hears("🔐 TMCELL parol", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
+  setUserState(ctx.from.id, { menu: "tmcell_set", step: "waiting" });
+
   await ctx.reply(
-    "🔐 TMCELL parol düzmek\n\n" +
+    "🔐 *TMCELL parol düzmek*\\n\\n" +
     "TMCELL parolyňyzy ýazyň:",
-    { reply_markup: new Keyboard().text("⬇️ Yza").resized() }
+    {
+      parse_mode: "Markdown",
+      reply_markup: new Keyboard().text("⬇️ Yza").resized(),
+    }
   );
 });
 
 bot.hears("💰 Çykarmak", async (ctx) => {
-  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
-  
+  setUserState(ctx.from.id, { menu: "withdraw", step: "waiting" });
+
   await ctx.reply(
-    "💰 Referal hasapdan çykarmak\n\n" +
+    "💰 *Referal hasapdan çykarmak*\\n\\n" +
     "Çykarmak isleýän mukdary ýazyň:",
-    { reply_markup: new Keyboard().text("⬇️ Yza").resized() }
+    {
+      parse_mode: "Markdown",
+      reply_markup: new Keyboard().text("⬇️ Yza").resized(),
+    }
   );
 });
 
-// ===== TEKST HABARLAR =====
+// ===== TEKST HABARLAR (STATE GÖRE) =====
 bot.on("message:text", async (ctx) => {
-  const text = ctx.message.text.toLowerCase();
-  
-  if (text.includes("salam") || text.includes("hello")) {
+  const text = ctx.message.text;
+  const state = getUserState(ctx.from.id);
+
+  // Parol üýtgetmek
+  if (state.menu === "password_change" && state.step === "waiting") {
+    if (text.length >= 4 && text.length <= 8 && /^\\d+$/.test(text)) {
+      userPasswords.set(ctx.from.id, text);
+      await ctx.reply(
+        "✅ *Parol üýtgedildi!*\\n\\n" +
+        "Gorag parolyňyz üstünlikli üýtgedildi.",
+        { parse_mode: "Markdown", reply_markup: personalMenuKeyboard() }
+      );
+      setUserState(ctx.from.id, { menu: "personal" });
+    } else {
+      await ctx.reply(
+        "⚠️ Parol 4-8 san aralygynda bolmaly.\\n" +
+        "Täzeden ýazyň:"
+      );
+    }
+    return;
+  }
+
+  // TMCELL parol
+  if (state.menu === "tmcell_set" && state.step === "waiting") {
+    userTmcell.set(ctx.from.id, text);
+    await ctx.reply(
+      "✅ *TMCELL parol ýatda saklandy!*",
+      { parse_mode: "Markdown", reply_markup: personalMenuKeyboard() }
+    );
+    setUserState(ctx.from.id, { menu: "personal" });
+    return;
+  }
+
+  // Çykarmak
+  if (state.menu === "withdraw" && state.step === "waiting") {
+    const amount = parseFloat(text);
+    if (isNaN(amount) || amount <= 0) {
+      await ctx.reply(
+        "⚠️ Dogry mukdar ýazyň.\\n" +
+        "Täzeden ýazyň:"
+      );
+      return;
+    }
+    await sendAdminOrder(ctx, "Çykarmak", amount.toString(), `Referal hasapdan çykarmak: ${amount} TMT`);
+    await ctx.reply(
+      "✅ *Çykarmak talaby iberildi!*\\n" +
+      "Admin tassyklamagy garaşylýar.",
+      { parse_mode: "Markdown", reply_markup: personalMenuKeyboard() }
+    );
+    setUserState(ctx.from.id, { menu: "personal" });
+    return;
+  }
+
+  // Sargyt et — tekst kabul etmek
+  if (state.menu === "order") {
+    await sendAdminOrder(ctx, "El sargyt", "Belli däl", `Ulanyjy sargyt: ${text}`);
+    await ctx.reply(
+      "✅ *Sargyt kabul edildi!*\\n\\n" +
+      "Admin size habarlaşar.",
+      { parse_mode: "Markdown", reply_markup: mainMenuKeyboard() }
+    );
+    setUserState(ctx.from.id, { menu: "main" });
+    return;
+  }
+
+  // Salam
+  const lowerText = text.toLowerCase();
+  if (lowerText.includes("salam") || lowerText.includes("hello")) {
     return await ctx.reply(
-      "👋 Salam! Kema Hyzmatlara hoş geldiňiz!\n\n" +
+      "👋 Salam! Kema Hyzmatlara hoş geldiňiz!\\n\\n" +
       "Näme satyn almak isleýärsiňiz?",
-      { 
+      {
         parse_mode: "Markdown",
-        reply_markup: mainMenuKeyboard()
+        reply_markup: mainMenuKeyboard(),
       }
     );
   }
-  
+
+  // Düşünmedim
   await ctx.reply(
-    "🤔 Düşünmedim.\n\n" +
+    "🤔 Düşünmedim.\\n\\n" +
     "📋 /start basyp, komandany görüp bilersiňiz.",
     { reply_markup: mainMenuKeyboard() }
   );
@@ -490,3 +680,10 @@ bot.on("message:text", async (ctx) => {
 bot.start();
 console.log("✅ Kema Hyzmatlar BOT işleýär!");
 console.log(`📱 Admin: @kemabest77`);
+'''
+
+with open("/mnt/agents/output/bot.js", "w", encoding="utf-8") as f:
+    f.write(code)
+
+print("✅ bot.js ýazdy!")
+print(f"📏 Uzynlygy: {len(code)} harp")
