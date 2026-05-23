@@ -117,8 +117,6 @@ function orderMenuKeyboard() {
 
 function personalMenuKeyboard() {
   return new Keyboard()
-    .text("✏️ Parol üýtget").text("🔐 TMCELL parol").row()
-    .text("💰 Çykarmak").row()
     .text("⬇️ Yza")
     .resized();
 }
@@ -351,9 +349,6 @@ bot.hears("👤 Şahsy otag", async (ctx) => {
     "👤 Şahsy otag\n\n" +
     `🆔 ID-ňiz: ${user.id}\n` +
     `👤 Adyňyz: ${user.first_name || "Belli däl"}\n\n` +
-    `🔒 Gorag parol: ${hasPassword}\n` +
-    `📱 TMCELL parol: ${hasTmcell}\n\n` +
-    `👥 Referal ssylka:\n${refLink}\n\n` +
     "Sizde 0 referal bar.",
     { reply_markup: personalMenuKeyboard() }
   );
@@ -467,38 +462,19 @@ bot.hears("📱 Admina ýaz", async (ctx) => {
   setUserState(ctx.from.id, { menu: "main" });
 });
 
-bot.hears("✏️ Parol üýtget", async (ctx) => {
+bot.hears("👤 Şahsy otag", async (ctx) => {
   trackUserMessage(ctx);
-  setUserState(ctx.from.id, { menu: "password_change", step: "waiting" });
+  setUserState(ctx.from.id, { menu: "personal" });
+  const user = ctx.from;
   await sendAndTrack(
     ctx,
-    "✏️ Gorag paroly üýtgetmek\n\n" +
-    "Täze paroly ýazyň (4-8 san):",
+    "👤 Şahsy otag\n\n" +
+    `🆔 ID-ňiz: ${user.id}\n` +
+    `👤 Adyňyz: ${user.first_name || "Belli däl"}`,
     { reply_markup: new Keyboard().text("⬇️ Yza").resized() }
   );
 });
 
-bot.hears("🔐 TMCELL parol", async (ctx) => {
-  trackUserMessage(ctx);
-  setUserState(ctx.from.id, { menu: "tmcell_set", step: "waiting" });
-  await sendAndTrack(
-    ctx,
-    "🔐 TMCELL parol düzmek\n\n" +
-    "TMCELL parolyňyzy ýazyň:",
-    { reply_markup: new Keyboard().text("⬇️ Yza").resized() }
-  );
-});
-
-bot.hears("💰 Çykarmak", async (ctx) => {
-  trackUserMessage(ctx);
-  setUserState(ctx.from.id, { menu: "withdraw", step: "waiting" });
-  await sendAndTrack(
-    ctx,
-    "💰 Referal hasapdan çykarmak\n\n" +
-    "Çykarmak isleýän mukdary ýazyň:",
-    { reply_markup: new Keyboard().text("⬇️ Yza").resized() }
-  );
-});
 
 bot.on("message:text", async (ctx) => {
   trackUserMessage(ctx);
