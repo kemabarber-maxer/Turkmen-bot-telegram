@@ -175,7 +175,7 @@ async function sendMainMenu(ctx) {
   const user = ctx.from;
   await sendAndTrack(
     ctx,
-    "🎉 Kema Hyzmatlar\n\n" +
+    "🌐 Kema Hyzmatlar\n\n" +
     "Hoş geldiňiz! Näme satyn almak isleýärsiňiz?\n\n" +
     `👤 ID-ňiz: ${user.id}`,
     { reply_markup: mainMenuKeyboard() }
@@ -366,7 +366,7 @@ bot.hears("📞 Habarlaş", async (ctx) => {
     ctx,
     "📞 Habarlaş\n\n" +
     `📱 Telegram: @${ADMIN_USERNAME}\n` +
-    "📍 Aşgabat şäheri",
+    "📍 +99362237781",
     {
       reply_markup: adminInlineKeyboard(),
     }
@@ -538,7 +538,7 @@ bot.on("message:text", async (ctx) => {
         `📱 Telefon: ${text}\n\n` +
         `📋 Sargyt maglumatlary:\n` +
         `\`\`\`${orderText}\`\`\`\n\n` +
-        `📩 Admina iberildi`,
+        `📩 Sargydy kopýalap admina ugrat`,
         {
           reply_markup: new InlineKeyboard()
             .url("📱 Admina ýaz", `https://t.me/${ADMIN_USERNAME}`).row()
@@ -598,7 +598,7 @@ bot.on("message:text", async (ctx) => {
         `📱 Telefon: ${text}\n\n` +
         `📋 Sargyt maglumatlary:\n` +
         `\`\`\`${orderText}\`\`\`\n\n` +
-        `📩 Admina iberildi`,
+        `📩 Sargydy kopýalap admina ugrat`,
         {
           reply_markup: new InlineKeyboard()
             .url("📱 Admina ýaz", `https://t.me/${ADMIN_USERNAME}`).row()
