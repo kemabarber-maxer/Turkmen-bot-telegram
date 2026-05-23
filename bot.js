@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const bot = new Bot("8836556532:AAEggdrCWkRfskzg-sPg8T9Xhdey44LPy9s");
+const bot = new Bot("8803704262:AAFlmxw40IWOBrD-Yoo1JT9QAbbWy1dtI_Q");
 const ADMIN_ID = "8375820047";
 const ADMIN_USERNAME = "kema_uc";
 
