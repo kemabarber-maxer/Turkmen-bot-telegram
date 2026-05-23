@@ -1,5 +1,4 @@
-
-code = '''import { Bot, Keyboard, InlineKeyboard } from "grammy";
+import { Bot, Keyboard, InlineKeyboard } from "grammy";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -601,10 +600,3 @@ bot.on("message:text", async (ctx) => {
 bot.start();
 console.log("✅ Kema Hyzmatlar BOT işleýär!");
 console.log(`📱 Admin: @${ADMIN_USERNAME}`);
-'''
-
-with open("/mnt/agents/output/bot.js", "w", encoding="utf-8") as f:
-    f.write(code)
-
-print("✅ bot.js ýazdy!")
-print(f"📏 Uzynlygy: {len(code)} harp")
