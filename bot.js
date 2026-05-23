@@ -22,8 +22,12 @@ const vpnTypes = [
   { name: "Outline", icon: "🔐" },
 ];
 
-// ===== ASAKDAKI MENYULAR (Reply Keyboard) =====
+// ===== KÖNE MENÝUNY AÝYRMAK =====
+function removeKeyboard() {
+  return { remove_keyboard: true };
+}
 
+// ===== ESASY MENÝU =====
 function mainMenuKeyboard() {
   return new Keyboard()
     .text("💎 UC satyn al").text("🔒 VPN satyn al").row()
@@ -33,6 +37,7 @@ function mainMenuKeyboard() {
     .resized();
 }
 
+// ===== UC MENYUSY =====
 function ucMenuKeyboard() {
   const keyboard = new Keyboard().resized();
   ucPrices.forEach((item, index) => {
@@ -43,6 +48,7 @@ function ucMenuKeyboard() {
   return keyboard;
 }
 
+// ===== VPN MENYUSY =====
 function vpnMenuKeyboard() {
   const keyboard = new Keyboard().resized();
   vpnTypes.forEach((type) => {
@@ -52,6 +58,7 @@ function vpnMenuKeyboard() {
   return keyboard;
 }
 
+// ===== VPN TÖLEG MENYUSY =====
 function vpnPaymentKeyboard(type) {
   return new Keyboard()
     .text(`📅 ${type} — Aýlyk (80 TMT)`).row()
@@ -60,6 +67,7 @@ function vpnPaymentKeyboard(type) {
     .resized();
 }
 
+// ===== SARGYT MENYUSY =====
 function orderMenuKeyboard() {
   return new Keyboard()
     .text("💎 UC sayla").text("🔒 VPN sayla").row()
@@ -67,6 +75,7 @@ function orderMenuKeyboard() {
     .resized();
 }
 
+// ===== ŞAHSY OTAG MENYUSY =====
 function personalMenuKeyboard() {
   return new Keyboard()
     .text("✏️ Parol üýtget").text("🔐 TMCELL parol").row()
@@ -76,7 +85,6 @@ function personalMenuKeyboard() {
 }
 
 // ===== ADMINA HABAR BERMEK =====
-
 async function sendAdminOrder(ctx, product, price, details = "") {
   const user = ctx.from;
   const now = new Date().toLocaleString("tk-TM", {
@@ -105,7 +113,6 @@ async function sendAdminOrder(ctx, product, price, details = "") {
 }
 
 // ===== START KOMANDASY =====
-
 bot.command("start", async (ctx) => {
   const user = ctx.from;
   await ctx.reply(
@@ -121,9 +128,11 @@ bot.command("start", async (ctx) => {
   );
 });
 
-// ===== UC MENYUSY =====
-
+// ===== UC SATYN AL =====
 bot.hears("💎 UC satyn al", async (ctx) => {
+  // Köne menýuny aýyr
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   let text = "🤔 Haýsy görnüş bilen tölegi geçirmek isleýärsiňiz?\n\n" +
     "💰 Nagt\n" +
     "📞 Telefona";
@@ -139,6 +148,8 @@ bot.hears("💎 UC satyn al", async (ctx) => {
 });
 
 bot.hears("💰 Nagt", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   let text = "💎 UC Bahalary:\n\n";
   ucPrices.forEach(item => {
     text += `• ${item.uc} UC — ${item.tmt} TMT\n`;
@@ -152,6 +163,8 @@ bot.hears("💰 Nagt", async (ctx) => {
 });
 
 bot.hears("📞 Telefona", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   let text = "💎 UC Bahalary:\n\n";
   ucPrices.forEach(item => {
     text += `• ${item.uc} UC — ${item.tmt} TMT\n`;
@@ -168,6 +181,8 @@ bot.hears("📞 Telefona", async (ctx) => {
 ucPrices.forEach(item => {
   bot.hears(`${item.uc} UC — ${item.tmt} TMT`, async (ctx) => {
     await sendAdminOrder(ctx, `${item.uc} UC`, item.tmt, `UC sargyt: ${item.uc} UC`);
+    
+    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
     
     await ctx.reply(
       `✅ Sargyt kabul edildi!\n\n` +
@@ -186,9 +201,10 @@ ucPrices.forEach(item => {
   });
 });
 
-// ===== VPN MENYUSY =====
-
+// ===== VPN SATYN AL =====
 bot.hears("🔒 VPN satyn al", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   await ctx.reply(
     "🔒 VPN Hyzmatlary:\n\n" +
     "Hyzmat saýlaň:",
@@ -202,6 +218,8 @@ bot.hears("🔒 VPN satyn al", async (ctx) => {
 // VPN tipleri basylanda
 vpnTypes.forEach(type => {
   bot.hears(`${type.icon} ${type.name}`, async (ctx) => {
+    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+    
     await ctx.reply(
       `${type.icon} ${type.name} VPN\n\n` +
       `📅 Aýlyk — 80 TMT\n` +
@@ -216,9 +234,10 @@ vpnTypes.forEach(type => {
 
 // VPN tölegleri basylanda
 vpnTypes.forEach(type => {
-  // Aýlyk
   bot.hears(`📅 ${type.name} — Aýlyk (80 TMT)`, async (ctx) => {
     await sendAdminOrder(ctx, `${type.name} VPN`, "80", `VPN: ${type.name} (Aýlyk)`);
+    
+    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
     
     await ctx.reply(
       `✅ VPN Sargyt kabul edildi!\n\n` +
@@ -237,9 +256,10 @@ vpnTypes.forEach(type => {
     );
   });
   
-  // Hepde
   bot.hears(`📆 ${type.name} — Hepde (30 TMT)`, async (ctx) => {
     await sendAdminOrder(ctx, `${type.name} VPN`, "30", `VPN: ${type.name} (Hepde)`);
+    
+    await ctx.reply("⏳", { reply_markup: removeKeyboard() });
     
     await ctx.reply(
       `✅ VPN Sargyt kabul edildi!\n\n` +
@@ -260,8 +280,9 @@ vpnTypes.forEach(type => {
 });
 
 // ===== SARGYT ET =====
-
 bot.hears("🛒 Sargyt et", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   await ctx.reply(
     "🛒 Sargyt etmek\n\n" +
     "Sargyt etmek üçin aşakdaky maglumatlary iberiň:\n\n" +
@@ -276,6 +297,8 @@ bot.hears("🛒 Sargyt et", async (ctx) => {
 });
 
 bot.hears("💎 UC sayla", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   let text = "🤔 Haýsy görnüş bilen tölegi geçirmek isleýärsiňiz?\n\n" +
     "💰 Nagt\n" +
     "📞 Telefona";
@@ -291,6 +314,8 @@ bot.hears("💎 UC sayla", async (ctx) => {
 });
 
 bot.hears("🔒 VPN sayla", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   await ctx.reply(
     "🔒 VPN Hyzmatlary:\n\n" +
     "Hyzmat saýlaň:",
@@ -302,8 +327,9 @@ bot.hears("🔒 VPN sayla", async (ctx) => {
 });
 
 // ===== ŞAHSY OTAG =====
-
 bot.hears("👤 Şahsy otag", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   const user = ctx.from;
   const refLink = `https://t.me/${ctx.me.username}?start=${user.id}`;
   
@@ -326,8 +352,9 @@ bot.hears("👤 Şahsy otag", async (ctx) => {
 });
 
 // ===== HABARLAŞ =====
-
 bot.hears("📞 Habarlaş", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   await ctx.reply(
     "📞 Habarlaş\n\n" +
     "📱 Telegram: @kemabest77\n" +
@@ -343,8 +370,9 @@ bot.hears("📞 Habarlaş", async (ctx) => {
 });
 
 // ===== BAL TOPLA =====
-
 bot.hears("💰 Bal topla", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   await ctx.reply(
     "💰 Bal topla / Gazan\n\n" +
     "🎁 Her sargyt üçin bal gazanyň!\n\n" +
@@ -359,9 +387,10 @@ bot.hears("💰 Bal topla", async (ctx) => {
   );
 });
 
-// ===== ESASY MENÝU WE YZA =====
-
+// ===== ESASY MENÝU =====
 bot.hears("⬇️ Esasy menýu", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   const user = ctx.from;
   await ctx.reply(
     "🎉 Kema Hyzmatlar\n\n" +
@@ -376,7 +405,10 @@ bot.hears("⬇️ Esasy menýu", async (ctx) => {
   );
 });
 
+// ===== YZA =====
 bot.hears("⬇️ Yza", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   const user = ctx.from;
   await ctx.reply(
     "🎉 Kema Hyzmatlar\n\n" +
@@ -392,8 +424,9 @@ bot.hears("⬇️ Yza", async (ctx) => {
 });
 
 // ===== ADYNA ÝAZMAK =====
-
 bot.hears("📱 Admina ýaz", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   await ctx.reply(
     "📱 Admin bilen habarlaşmak üçin @kemabest77 ýazaýyň.",
     { reply_markup: mainMenuKeyboard() }
@@ -401,8 +434,9 @@ bot.hears("📱 Admina ýaz", async (ctx) => {
 });
 
 // ===== ŞAHSY OTAG DÜWMELERI =====
-
 bot.hears("✏️ Parol üýtget", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   await ctx.reply(
     "✏️ Gorag paroly üýtgetmek\n\n" +
     "Täze paroly ýazyň:",
@@ -411,6 +445,8 @@ bot.hears("✏️ Parol üýtget", async (ctx) => {
 });
 
 bot.hears("🔐 TMCELL parol", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   await ctx.reply(
     "🔐 TMCELL parol düzmek\n\n" +
     "TMCELL parolyňyzy ýazyň:",
@@ -419,6 +455,8 @@ bot.hears("🔐 TMCELL parol", async (ctx) => {
 });
 
 bot.hears("💰 Çykarmak", async (ctx) => {
+  await ctx.reply("⏳", { reply_markup: removeKeyboard() });
+  
   await ctx.reply(
     "💰 Referal hasapdan çykarmak\n\n" +
     "Çykarmak isleýän mukdary ýazyň:",
@@ -426,8 +464,7 @@ bot.hears("💰 Çykarmak", async (ctx) => {
   );
 });
 
-// ===== TEKST HABARLAR (düşünmedim) =====
-
+// ===== TEKST HABARLAR =====
 bot.on("message:text", async (ctx) => {
   const text = ctx.message.text.toLowerCase();
   
@@ -442,7 +479,6 @@ bot.on("message:text", async (ctx) => {
     );
   }
   
-  // Başga tekstler üçin menýu görkez
   await ctx.reply(
     "🤔 Düşünmedim.\n\n" +
     "📋 /start basyp, komandany görüp bilersiňiz.",
@@ -451,7 +487,6 @@ bot.on("message:text", async (ctx) => {
 });
 
 // ===== BOTY BAŞLATMAK =====
-
 bot.start();
 console.log("✅ Kema Hyzmatlar BOT işleýär!");
 console.log(`📱 Admin: @kemabest77`);
